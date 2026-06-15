@@ -19,10 +19,9 @@
   .b{color:var(--blue)}
   .ital{font-style:italic;transform:skewX(-6deg);display:inline-block}
 
-  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:26px 20px 4px}
-  .logocircle{width:220px;height:220px;border-radius:50%;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px -12px rgba(0,0,0,.4)}
-  .brandlogo{width:100%;height:100%;object-fit:cover;display:block}
-  @media(max-width:560px){.logocircle{width:160px;height:160px}}
+  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:30px 20px 6px}
+  .brandlogo{height:120px;width:auto;max-width:92%;object-fit:contain;display:block}
+  @media(max-width:560px){.brandlogo{height:84px}}
   .logofallback{font-family:"Anton",sans-serif;text-transform:uppercase;transform:skewX(-7deg);
     font-size:22px;color:var(--ink);letter-spacing:.5px}
   .logofallback .b{color:var(--blue)}
@@ -116,7 +115,7 @@
 </head>
 <body>
   <header class="brand">
-    <div class="logocircle"><img src="https://i.imgur.com/1x7C3Vr.png" alt="Acelerador de Resultados" class="brandlogo" onerror="this.parentNode.style.display='none';document.getElementById('bf').style.display='inline-block'"></div>
+    <img src="https://i.imgur.com/1x7C3Vr.png" alt="Escola do Dólar" class="brandlogo" onerror="this.style.display='none';document.getElementById('bf').style.display='inline-block'">
     <span id="bf" class="logofallback" style="display:none">ACELERADOR <span class="b">DE RESULTADOS</span></span>
   </header>
   <main class="wrap" id="app"></main>
