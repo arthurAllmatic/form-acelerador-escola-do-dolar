@@ -19,9 +19,9 @@
   .b{color:var(--blue)}
   .ital{font-style:italic;transform:skewX(-6deg);display:inline-block}
 
-  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:30px 20px 6px}
-  .brandlogo{height:120px;width:auto;max-width:92%;object-fit:contain;display:block}
-  @media(max-width:560px){.brandlogo{height:84px}}
+  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:34px 20px 4px}
+  .brandlogo{height:185px;width:auto;max-width:94%;object-fit:contain;display:block}
+  @media(max-width:560px){.brandlogo{height:120px}}
   .logofallback{font-family:"Anton",sans-serif;text-transform:uppercase;transform:skewX(-7deg);
     font-size:22px;color:var(--ink);letter-spacing:.5px}
   .logofallback .b{color:var(--blue)}
@@ -114,7 +114,7 @@
 </style>
 </head>
 <body>
-  <header class="brand">
+  <header class="brand" id="brand">
     <img src="https://i.imgur.com/1x7C3Vr.png" alt="Escola do Dólar" class="brandlogo" onerror="this.style.display='none';document.getElementById('bf').style.display='inline-block'">
     <span id="bf" class="logofallback" style="display:none">ACELERADOR <span class="b">DE RESULTADOS</span></span>
   </header>
@@ -141,12 +141,7 @@ const STEPS=[
   {key:"trava",n:9,type:"multi",eyebrow:"O que te trava",title:'O que mais <span class="b">te trava</span>?',
     options:["Não sei por onde começar","Não sei escolher o produto","Medo de não dar certo","A parte técnica","Falta de tempo","Atrair clientes"]},
   {key:"duvida",n:10,type:"textarea",eyebrow:"Dúvidas",title:'Teve alguma <span class="b">dúvida ou receio</span>?',sub:"Se sim, conta o que foi.",placeholder:"Pode escrever do seu jeito.",optional:true,checkbox:"Não, foi tudo tranquilo",checkKey:"duvida_ok"},
-  {key:"pesou",n:11,type:"textarea",eyebrow:"O que pesou",title:'Nos conte a sua <span class="b">dificuldade ou dúvida</span>.',placeholder:"Pode escrever do seu jeito.",optional:true,cond:a=>!a.duvida_ok},
-  {key:"outras",n:12,type:"single",eyebrow:"Outras plataformas",title:'Quer aprender a vender em <span class="b">outras plataformas</span>? (Mercado Livre, Amazon, TikTok…)',
-    options:["Sim","Não"]},
-  {key:"quais",n:13,type:"multi",eyebrow:"Quais",title:'Quais <span class="b">plataformas</span> você quer aprender?',cond:a=>a.outras==="Sim",
-    options:["Tik Tok","Mercado Livre","Amazon","Shein","Shopee","Outras"]},
-  {key:"porque",n:13,type:"textarea",eyebrow:"Por que",title:'Por que você prefere ficar <span class="b">só na Shopify</span>?',placeholder:"Pode escrever do seu jeito.",optional:true,cond:a=>a.outras==="Não"}
+  {key:"pesou",n:11,type:"textarea",eyebrow:"O que pesou",title:'Nos conte a sua <span class="b">dificuldade ou dúvida</span>.',placeholder:"Pode escrever do seu jeito.",optional:true,cond:a=>!a.duvida_ok}
 ];
 
 const app=document.getElementById("app");
@@ -206,6 +201,7 @@ function valid(step){
 
 function render(){
   const list=seq();
+  const hdr=document.getElementById('brand'); if(hdr) hdr.style.display=(i===-1?'flex':'none');
   if(i===-1){renderWelcome();return}
   if(i>=list.length){renderFinal();return}
   const s=list[i];
