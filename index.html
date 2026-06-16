@@ -6,48 +6,48 @@
 <title>Acelerador de Resultados · Sua Loja Nichada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#ffffff;--ink:#0e1116;--muted:#5b626b;--line:#e8e8ea;
-    --gold:#b8860b;--gold-deep:#9a7b2e;--gold-soft:#faf4e4;--gold-line:#ecdcaf;
-    --grad:linear-gradient(135deg,#9a7b2e,#e6c36a 45%,#b8860b);
-    --btn:linear-gradient(135deg,#caa04a,#f0d488 48%,#b8860b);
+    --bg:#ffffff;--ink:#1a1620;--muted:#6a6470;--line:#e9e7ea;
+    --gold:#b8860b;--gold-deep:#8a6a2c;--gold-soft:#faf4e4;--gold-line:#ecdcaf;
+    --grad:linear-gradient(135deg,#8a6a2c,#caa64e 45%,#a6791f);
+    --btn:linear-gradient(135deg,#c29a44,#eccf85 48%,#b8860b);
+    --serif:"DM Serif Display",Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);
     -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100dvh}
   .b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .ital{font-style:italic;transform:skewX(-6deg);display:inline-block}
-  .mono{font-family:"JetBrains Mono",monospace}
+  .ital{font-style:italic}
 
-  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:34px 20px 4px}
-  .brandlogo{height:175px;width:auto;max-width:94%;object-fit:contain;display:block;filter:brightness(0)}
-  @media(max-width:560px){.brandlogo{height:116px}}
-  .logofallback{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:22px;color:var(--ink);letter-spacing:.5px}
+  header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:36px 20px 4px}
+  .brandlogo{height:165px;width:auto;max-width:94%;object-fit:contain;display:block;filter:brightness(0)}
+  @media(max-width:560px){.brandlogo{height:112px}}
+  .logofallback{font-family:var(--serif);font-size:26px;color:var(--ink)}
 
   .wrap{flex:1;display:flex;flex-direction:column;max-width:680px;width:100%;margin:0 auto;padding:0 24px 24px}
 
-  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 26px;min-height:44px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 30px;min-height:44px}
   .back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);
-    font:600 13px "JetBrains Mono",monospace;letter-spacing:.5px;cursor:pointer;padding:6px 4px;border-radius:8px;visibility:hidden}
+    font:600 13px Inter;letter-spacing:.4px;cursor:pointer;padding:6px 4px;border-radius:8px;visibility:hidden}
   .back:hover{color:var(--ink)}
   .dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;flex:1}
   .dot{width:7px;height:7px;border-radius:5px;background:var(--line);transition:.25s}
   .dot.done{background:var(--gold)}
   .dot.cur{width:22px;background:var(--gold)}
-  .count{font:600 13px "JetBrains Mono",monospace;color:var(--muted);min-width:52px;text-align:right;letter-spacing:.5px}
+  .count{font:600 13px Inter;color:var(--muted);min-width:50px;text-align:right;letter-spacing:.4px}
 
-  .screen{flex:1;display:flex;flex-direction:column;animation:in .45s cubic-bezier(.2,.7,.2,1)}
+  .screen{flex:1;display:flex;flex-direction:column;animation:in .5s cubic-bezier(.2,.7,.2,1)}
   @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  .eyebrow{display:flex;align-items:center;gap:10px;font:600 12px "JetBrains Mono",monospace;letter-spacing:2.5px;
-    text-transform:uppercase;color:var(--gold-deep);margin-bottom:16px}
-  .eyebrow::before{content:"";width:24px;height:2px;background:var(--grad);border-radius:2px}
-  h1.q{font:700 33px/1.14 "Space Grotesk","Inter",sans-serif;letter-spacing:-.8px;margin-bottom:10px}
-  @media(max-width:560px){h1.q{font-size:27px}}
-  .sub{font:500 15px Inter;color:var(--muted);margin:-2px 0 22px}
-  .body{margin-top:8px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font:600 12px Inter;letter-spacing:3px;
+    text-transform:uppercase;color:var(--gold-deep);margin-bottom:20px}
+  .eyebrow::before{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
+  h1.q{font:400 40px/1.1 var(--serif);letter-spacing:0;margin-bottom:12px}
+  @media(max-width:560px){h1.q{font-size:31px}}
+  .sub{font:400 16px/1.5 Inter;color:var(--muted);margin:-2px 0 24px}
+  .body{margin-top:10px}
 
   input.fld,textarea.fld,select.fld{width:100%;border:1.5px solid var(--line);border-radius:14px;background:#fff;
     padding:17px 18px;font:500 17px Inter;color:var(--ink);outline:none;transition:.18s}
@@ -56,12 +56,12 @@
   textarea.fld{resize:none;min-height:120px;line-height:1.45}
   .phone{display:flex;gap:10px}
   select.ddi{width:130px;flex:0 0 auto;cursor:pointer;padding-right:10px;
-    -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235b626b' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a6470' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:right 14px center}
 
   .opts{display:flex;flex-direction:column;gap:11px}
   .opt{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
-    padding:15px 18px;font:600 16px Inter;cursor:pointer;transition:.16s;text-align:left;width:100%}
+    padding:15px 18px;font:500 16px Inter;cursor:pointer;transition:.16s;text-align:left;width:100%}
   .opt:hover{border-color:var(--gold-line)}
   .opt .mark{flex:0 0 auto;width:21px;height:21px;border:1.8px solid #cfcabb;display:flex;align-items:center;
     justify-content:center;transition:.16s;color:#fff;font-size:13px}
@@ -75,50 +75,52 @@
   .reveal.on{display:block;animation:in .3s ease}
 
   .check{display:inline-flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;
-    background:#fff;padding:14px 18px;font:600 15px Inter;cursor:pointer;margin-top:14px;transition:.16s}
+    background:#fff;padding:14px 18px;font:500 15px Inter;cursor:pointer;margin-top:14px;transition:.16s}
   .check .mark{width:21px;height:21px;border:1.8px solid #cfcabb;border-radius:6px;display:flex;align-items:center;
     justify-content:center;color:#fff;font-size:13px;transition:.16s}
   .check.sel{border-color:var(--gold);background:var(--gold-soft)}
   .check.sel .mark{background:var(--gold);border-color:var(--gold)}
   .check.sel .mark::after{content:"\2713"}
 
-  .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:30px 0 8px;margin-top:auto}
-  .skip{background:none;border:none;color:var(--muted);font:600 13px "JetBrains Mono",monospace;cursor:pointer;visibility:hidden}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:32px 0 8px;margin-top:auto}
+  .skip{background:none;border:none;color:var(--muted);font:600 13px Inter;cursor:pointer;visibility:hidden}
   .skip:hover{color:var(--ink)}
-  .next{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--btn);color:#1a1408;border:none;
-    font:600 16px "Space Grotesk","Inter",sans-serif;letter-spacing:.2px;padding:15px 32px;border-radius:34px;cursor:pointer;transition:.18s;
-    box-shadow:0 10px 24px -12px rgba(184,134,11,.75)}
+  .next{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--btn);color:#2a1f08;border:none;
+    font:700 15px Inter;letter-spacing:.2px;padding:15px 32px;border-radius:34px;cursor:pointer;transition:.18s;
+    box-shadow:0 10px 24px -12px rgba(184,134,11,.7)}
   .next:hover{filter:brightness(1.04)}
   .next:disabled{background:#edeef0;color:#aeb4be;box-shadow:none;cursor:not-allowed}
 
   .hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 0 0}
-  .hero .kick{font:600 12px "JetBrains Mono",monospace;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:18px}
-  .hero h1{font:700 46px/1.07 "Space Grotesk","Inter",sans-serif;letter-spacing:-1.4px;margin-bottom:22px}
-  @media(max-width:560px){.hero h1{font-size:34px}}
-  .hero p{font:500 17px/1.65 Inter;color:#4a5159;max-width:560px;margin-bottom:30px}
-  .herorow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-  .start{background:var(--btn);color:#1a1408;border:none;font:600 17px "Space Grotesk","Inter",sans-serif;padding:17px 38px;
-    border-radius:36px;cursor:pointer;box-shadow:0 12px 28px -12px rgba(184,134,11,.8);transition:.18s}
+  .hero .kick{font:600 12px Inter;letter-spacing:3px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:20px;
+    display:flex;align-items:center;gap:12px}
+  .hero .kick::before{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
+  .hero h1{font:400 56px/1.06 var(--serif);letter-spacing:0;margin-bottom:24px}
+  @media(max-width:560px){.hero h1{font-size:38px}}
+  .hero p{font:400 17px/1.7 Inter;color:#4a4651;max-width:560px;margin-bottom:32px}
+  .herorow{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .start{background:var(--btn);color:#2a1f08;border:none;font:700 16px Inter;padding:17px 40px;
+    border-radius:36px;cursor:pointer;box-shadow:0 12px 28px -12px rgba(184,134,11,.75);transition:.18s}
   .start:hover{filter:brightness(1.04)}
-  .hint{font:500 12px "JetBrains Mono",monospace;letter-spacing:1px;color:#aeb4be}
+  .hint{font:500 12px Inter;letter-spacing:1px;text-transform:uppercase;color:#b3b0ba}
 
   .thanks{flex:1;min-height:calc(100dvh - 120px);position:relative;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;padding:40px 8px;overflow:hidden}
-  .wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) skewX(-7deg);font-family:"Space Grotesk",sans-serif;font-weight:700;
-    font-size:clamp(56px,15vw,128px);line-height:1;color:var(--ink);opacity:.035;letter-spacing:2px;
+  .wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--serif);
+    font-size:clamp(60px,16vw,150px);line-height:1;color:var(--ink);opacity:.04;letter-spacing:1px;
     white-space:nowrap;pointer-events:none;z-index:0;max-width:100%}
   .thanks>*{position:relative;z-index:1}
-  .thanks .eyebrow{justify-content:center;margin-bottom:20px}
-  .thanks .eyebrow::after{content:"";width:24px;height:2px;background:var(--grad);border-radius:2px}
-  .thanks h1{font:700 clamp(34px,7vw,54px)/1.06 "Space Grotesk","Inter",sans-serif;letter-spacing:-1.4px;margin:0 0 22px;max-width:660px}
-  .thanks p{font:500 clamp(16px,2.4vw,17px)/1.7 Inter;color:#4a5159;max-width:540px;margin:0 auto 30px}
-  .thanks .ty-end{font:700 clamp(26px,5vw,30px) "Space Grotesk","Inter",sans-serif;font-style:italic;transform:skewX(-6deg);display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .thanks .eyebrow{justify-content:center;margin-bottom:22px}
+  .thanks .eyebrow::after{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
+  .thanks h1{font:400 clamp(38px,7.5vw,60px)/1.06 var(--serif);letter-spacing:0;margin:0 0 24px;max-width:680px}
+  .thanks p{font:400 clamp(16px,2.4vw,17px)/1.7 Inter;color:#4a4651;max-width:540px;margin:0 auto 32px}
+  .thanks .ty-end{font:400 clamp(30px,5.5vw,38px) var(--serif);font-style:italic;display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 </style>
 </head>
 <body>
   <header class="brand" id="brand">
     <img src="https://i.imgur.com/1x7C3Vr.png" alt="Escola do Dólar" class="brandlogo" onerror="this.style.display='none';document.getElementById('bf').style.display='inline-block'">
-    <span id="bf" class="logofallback" style="display:none">ESCOLA DO DÓLAR</span>
+    <span id="bf" class="logofallback" style="display:none">Escola do Dólar</span>
   </header>
   <main class="wrap" id="app"></main>
 
@@ -128,22 +130,22 @@ const DDIS=[["Brasil","+55","🇧🇷"],["Portugal","+351","🇵🇹"],["EUA / C
   ["Austrália","+61","🇦🇺"],["Japão","+81","🇯🇵"],["Outro","+","🌐"]];
 
 const STEPS=[
-  {key:"nome",n:1,type:"text",eyebrow:"Nome",title:'Primeiro, como você <span class="b">se chama</span>?',placeholder:"Ex: Mariana Souza"},
-  {key:"email",n:2,type:"email",eyebrow:"E-mail",title:'Qual e-mail você usou na <span class="b">Hotmart</span>?',placeholder:"voce@email.com"},
-  {key:"whatsapp",n:3,type:"tel",eyebrow:"WhatsApp",title:'Seu melhor <span class="b">WhatsApp</span> (com DDD)',sub:"É por aqui que avisamos quando a sua loja tá pronta."},
-  {key:"categoria",n:4,type:"single",eyebrow:"Categoria",title:'Qual <span class="b">nicho</span> você quer trabalhar?',sub:"A equipe valida e monta a melhor loja pro seu perfil.",
+  {key:"nome",n:1,type:"text",eyebrow:"Nome",title:'Primeiro, como você <span class="b ital">se chama</span>?',placeholder:"Ex: Mariana Souza"},
+  {key:"email",n:2,type:"email",eyebrow:"E-mail",title:'Qual e-mail você usou na <span class="b ital">Hotmart</span>?',placeholder:"voce@email.com"},
+  {key:"whatsapp",n:3,type:"tel",eyebrow:"WhatsApp",title:'Seu melhor <span class="b ital">WhatsApp</span> (com DDD)',sub:"É por aqui que avisamos quando a sua loja tá pronta."},
+  {key:"categoria",n:4,type:"single",eyebrow:"Categoria",title:'Qual <span class="b ital">nicho</span> você quer trabalhar?',sub:"A equipe valida e monta a melhor loja pro seu perfil.",
     options:["🧬 Longevidade","⚡ Vitalidade","🧔 Saúde Masculina","Escolha pra mim — confio na equipe"]},
-  {key:"motivo",n:5,type:"multi",eyebrow:"Motivo da compra",title:'Por que você <span class="b">adquiriu</span> o Acelerador?',otherLabel:"Outro motivo",otherKey:"motivo_outro",otherPH:"Conta pra gente…",
+  {key:"motivo",n:5,type:"multi",eyebrow:"Motivo da compra",title:'Por que você <span class="b ital">adquiriu</span> o Acelerador?',otherLabel:"Outro motivo",otherKey:"motivo_outro",otherPH:"Conta pra gente…",
     options:["Não sei por onde começar","Já tentei sozinho(a) e não deu certo","Quero economizar tempo","Falta de confiança pra montar sozinho(a)","Pra ficar mais profissional","Acredito que terei mais resultados","Confio na metodologia do Acelerador","Outro motivo"]},
-  {key:"obs",n:6,type:"textarea",eyebrow:"Opcional",title:'Quer contar <span class="b">mais</span> sobre o motivo?',placeholder:"Pode escrever do seu jeito.",optional:true},
-  {key:"experiencia",n:7,type:"single",eyebrow:"Experiência",title:'Você já <span class="b">vende na Shopify</span> hoje?',
+  {key:"obs",n:6,type:"textarea",eyebrow:"Opcional",title:'Quer contar <span class="b ital">mais</span> sobre o motivo?',placeholder:"Pode escrever do seu jeito.",optional:true},
+  {key:"experiencia",n:7,type:"single",eyebrow:"Experiência",title:'Você já <span class="b ital">vende na Shopify</span> hoje?',
     options:["Sim, já vendo","Já tive e parei","Nunca vendi na Shopify"]},
-  {key:"tempo",n:8,type:"single",eyebrow:"Disponibilidade",title:'Quanto <span class="b">tempo por dia</span> você tem?',
+  {key:"tempo",n:8,type:"single",eyebrow:"Disponibilidade",title:'Quanto <span class="b ital">tempo por dia</span> você tem?',
     options:["Menos de 1h","1 a 2h","3 a 4h","5h ou mais"]},
-  {key:"trava",n:9,type:"multi",eyebrow:"O que te trava",title:'O que mais <span class="b">te trava</span>?',
+  {key:"trava",n:9,type:"multi",eyebrow:"O que te trava",title:'O que mais <span class="b ital">te trava</span>?',
     options:["Não sei por onde começar","Não sei escolher o produto","Medo de não dar certo","A parte técnica","Falta de tempo","Atrair clientes"]},
-  {key:"duvida",n:10,type:"textarea",eyebrow:"Dúvidas",title:'Teve alguma <span class="b">dúvida ou receio</span>?',sub:"Se sim, conta o que foi.",placeholder:"Pode escrever do seu jeito.",optional:true,checkbox:"Não, foi tudo tranquilo",checkKey:"duvida_ok"},
-  {key:"pesou",n:11,type:"textarea",eyebrow:"O que pesou",title:'Nos conte a sua <span class="b">dificuldade ou dúvida</span>.',placeholder:"Pode escrever do seu jeito.",optional:true,cond:a=>!a.duvida_ok}
+  {key:"duvida",n:10,type:"textarea",eyebrow:"Dúvidas",title:'Teve alguma <span class="b ital">dúvida ou receio</span>?',sub:"Se sim, conta o que foi.",placeholder:"Pode escrever do seu jeito.",optional:true,checkbox:"Não, foi tudo tranquilo",checkKey:"duvida_ok"},
+  {key:"pesou",n:11,type:"textarea",eyebrow:"O que pesou",title:'Nos conte a sua <span class="b ital">dificuldade ou dúvida</span>.',placeholder:"Pode escrever do seu jeito.",optional:true,cond:a=>!a.duvida_ok}
 ];
 
 const app=document.getElementById("app");
@@ -302,7 +304,7 @@ function renderWelcome(){
     <div class="nav"><button class="back" style="visibility:hidden">&larr;</button><div class="dots"></div><div class="count"></div></div>
     <div class="hero">
       <div class="kick">Acelerador · Sua loja nichada</div>
-      <h1>Bora montar a <span class="b">SUA</span> loja pra faturar em <span class="b ital">euro</span>?</h1>
+      <h1>Bora montar a <span class="b">sua</span> loja pra faturar em <span class="b ital">euro</span>?</h1>
       <p>Você já garantiu o Acelerador — o passo que separa quem sonha de quem faz. Agora vou te conhecer pra nossa equipe montar uma <b>loja nichada e validada</b> pro seu perfil (nada de loja genérica). São 2-3 minutos. Vem junto que a meta é euro.</p>
       <div class="herorow">
         <button class="start" id="start">Bora começar &rarr;</button>
@@ -316,7 +318,7 @@ function renderFinal(){
   const n=firstName();
   app.innerHTML=`
     <div class="thanks">
-      <div class="wm">OBRIGADO</div>
+      <div class="wm">Obrigado</div>
       <div class="eyebrow">Recebemos suas respostas</div>
       <h1>Agora é com a <span class="b ital">gente</span>.</h1>
       <p>Em até <b>1 dia útil</b>${n?", "+n+",":""} você recebe no seu WhatsApp os próximos passos da sua loja nichada. Enquanto isso, fica de olho no e-mail que você usou pra adquirir o Acelerador na Hotmart.</p>
