@@ -52,10 +52,6 @@
   input.fld::placeholder,textarea.fld::placeholder{color:#b6bcc6}
   input.fld:focus,textarea.fld:focus,select.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
   textarea.fld{resize:none;min-height:120px;line-height:1.45}
-  .phone{display:flex;gap:10px}
-  select.ddi{width:130px;flex:0 0 auto;cursor:pointer;padding-right:10px;
-    -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a6470' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 14px center}
 
   .opts{display:flex;flex-direction:column;gap:11px}
   .opt{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
@@ -68,17 +64,6 @@
   .opt.sel{border-color:var(--gold);background:var(--gold-soft)}
   .opt.sel .mark{background:var(--gold);border-color:var(--gold)}
   .opt.sel .mark::after{content:"\2713"}
-
-  .reveal{margin-top:12px;display:none}
-  .reveal.on{display:block;animation:in .3s ease}
-
-  .check{display:inline-flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;
-    background:#fff;padding:14px 18px;font:500 15px Inter;cursor:pointer;margin-top:14px;transition:.16s}
-  .check .mark{width:21px;height:21px;border:1.8px solid #cfcabb;border-radius:6px;display:flex;align-items:center;
-    justify-content:center;color:#fff;font-size:13px;transition:.16s}
-  .check.sel{border-color:var(--gold);background:var(--gold-soft)}
-  .check.sel .mark{background:var(--gold);border-color:var(--gold)}
-  .check.sel .mark::after{content:"\2713"}
 
   .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:32px 0 8px;margin-top:auto}
   .skip{background:none;border:none;color:var(--muted);font:600 13px Inter;cursor:pointer;visibility:hidden}
@@ -130,45 +115,46 @@
 
 <script>
 const FASE="fase3", FORMULARIO="como_vai_receber";
-const DDIS=[["Brasil","+55","🇧🇷"],["Portugal","+351","🇵🇹"],["EUA / Canadá","+1","🇺🇸"],["Espanha","+34","🇪🇸"],["Reino Unido","+44","🇬🇧"],
-  ["Itália","+39","🇮🇹"],["França","+33","🇫🇷"],["Alemanha","+49","🇩🇪"],["Irlanda","+353","🇮🇪"],["Argentina","+54","🇦🇷"],["México","+52","🇲🇽"],
-  ["Austrália","+61","🇦🇺"],["Japão","+81","🇯🇵"],["Outro","+","🌐"]];
+const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+
+/* Identidade vem da URL (ex: ?nome=Maria&email=maria@x.com&whatsapp=27998233325) */
+const Q=new URLSearchParams(location.search);
+function qp(){for(const k of arguments){const v=Q.get(k);if(v)return v;}return "";}
 
 const STEPS=[
-  {key:"nome",n:1,type:"text",eyebrow:"Nome",title:'Pra começar, como você <span class="b ital">se chama</span>?',placeholder:"Ex: Mariana Souza"},
-  {key:"email",n:2,type:"email",eyebrow:"E-mail",title:'Qual e-mail você usou na <span class="b ital">Hotmart</span>?',sub:"É como a equipe liga essa etapa ao seu cadastro.",placeholder:"voce@email.com"},
-  {key:"whatsapp",n:3,type:"tel",eyebrow:"WhatsApp",title:'Confirma seu <span class="b ital">WhatsApp</span> (com DDD)',sub:"É por aqui que a equipe finaliza tudo com você."},
-  {key:"receber",n:4,type:"single",eyebrow:"Receber · 1 de 3",title:'{n}, você já consegue <span class="b ital">receber em euro</span> hoje?',sub:"Pra vender pra fora, você precisa de uma conta que receba em euro. A gente trabalha com a Nomad.",
+  {key:"receber",n:1,type:"single",eyebrow:"Receber · 1 de 3",title:'{n}, você já consegue <span class="b ital">receber em euro</span> hoje?',sub:"Pra vender pra fora, você precisa de uma conta que receba em euro. A gente trabalha com a Nomad.",
     options:["Sim, já tenho conta na Nomad","Tenho conta, mas nunca recebi de fora","Ainda não tenho — preciso de ajuda"]},
-  {key:"inicio",n:5,type:"single",eyebrow:"Receber · 2 de 3",title:'Quando você quer <span class="b ital">começar a faturar</span>?',sub:"Não tem certo nem errado. Ajuda a equipe a priorizar.",
+  {key:"inicio",n:2,type:"single",eyebrow:"Receber · 2 de 3",title:'Quando você quer <span class="b ital">começar a faturar</span>?',sub:"Não tem certo nem errado. Ajuda a equipe a priorizar.",
     options:["O quanto antes 🔥","Nas próximas semanas","Ainda me organizando"]},
-  {key:"duvida",n:6,type:"textarea",eyebrow:"Receber · 3 de 3",title:'Tem alguma <span class="b ital">dúvida</span> pra equipe antes de começar?',sub:"Manda aqui que a gente já chega resolvendo. Pode pular.",placeholder:"Ex: como faço pra abrir a conta na Nomad?",optional:true}
+  {key:"duvida",n:3,type:"textarea",eyebrow:"Receber · 3 de 3",title:'Tem alguma <span class="b ital">dúvida</span> pra equipe antes de começar?',sub:"Manda aqui que a gente já chega resolvendo. Pode pular.",placeholder:"Ex: como faço pra abrir a conta na Nomad?",optional:true}
 ];
 
 const app=document.getElementById("app");
-const ans={ddi:"+55", _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8))};
-let i=-1;
+const ans={
+  _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)),
+  nome:qp("nome","name","first_name","fname","primeiro_nome"),
+  email:qp("email","mail","e-mail"),
+  whatsapp:qp("whatsapp","telefone","phone","wpp","celular","tel","fone"),
+  ddi:qp("ddi")||"+55"
+};
+let i=-1, leadEnviado=false;
 
 function seq(){ return STEPS.filter(s=>!s.cond||s.cond(ans)); }
 
-const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
 function buildPayload(step,status){
   return {
     id:ans._id, fase:FASE, formulario:FORMULARIO, step:step, status:status,
-    nome:ans.nome||"", email:(ans.email||"").trim(),
-    whatsapp:ans.whatsapp_full||((ans.ddi||"")+" "+(ans.whatsapp||"")).trim(),
-    ddi:ans.ddi||"", whatsapp_numero:ans.whatsapp||"",
-    respostas:{
-      recebimento:ans.receber||null, quando_comecar:ans.inicio||null, duvida:ans.duvida||null
-    },
+    nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
+    respostas:{ recebimento:ans.receber||null, quando_comecar:ans.inicio||null, duvida:ans.duvida||null },
     atualizado_em:new Date().toISOString()
   };
 }
 function sendWebhook(step,status){
   try{
-    fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
-      headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify(buildPayload(step,status))});
+    const body=JSON.stringify(buildPayload(step,status));
+    const opt={method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body};
+    if(body.length<60000) opt.keepalive=true;
+    fetch(WEBHOOK,opt);
   }catch(e){}
 }
 
@@ -177,22 +163,11 @@ function tok(s){ if(!s) return s; const n=firstName();
   if(n) return s.replace(/\{n\}/g,n);
   return s.replace(/,?\s*\{n\}\s*,?/g," ").replace(/\s{2,}/g," ").replace(/\s+([.!?—])/g,"$1").trim(); }
 
-function emailOk(v){return /.+@.+\..+/.test(v)}
-function fmtPhone(ddi,d){
-  if(ddi==="+55"){ d=d.slice(0,11);
-    if(d.length<=2) return d;
-    if(d.length<=6) return "("+d.slice(0,2)+") "+d.slice(2);
-    if(d.length<=10) return "("+d.slice(0,2)+") "+d.slice(2,6)+"-"+d.slice(6);
-    return "("+d.slice(0,2)+") "+d.slice(2,7)+"-"+d.slice(7,11); }
-  d=d.slice(0,15); return d.replace(/(.{3})(?=.)/g,"$1 ").trim();
-}
 function valid(step){
-  if(step.optional) return true;
+  if(step.optional||step.type==="info") return true;
   const v=ans[step.key];
   if(step.type==="multi") return Array.isArray(v)&&v.length>0;
   if(step.type==="single") return !!v;
-  if(step.type==="email") return emailOk((v||"").trim());
-  if(step.type==="tel") return (ans.whatsapp_d||"").length>=(ans.ddi==="+55"?10:8);
   return (v||"").trim().length>1;
 }
 
@@ -203,30 +178,22 @@ function render(){
   if(i>=list.length){renderFinal();return}
   const s=list[i];
   const dots=list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
+  const count=`${i+1} / ${list.length}`;
   let bodyHTML="";
-  if(s.type==="tel"){
-    bodyHTML=`<div class="phone">
-      <select class="fld ddi" id="ddi">${DDIS.map(([nm,c,f])=>`<option value="${c}" ${c===ans.ddi?'selected':''}>${f} ${c}</option>`).join("")}</select>
-      <input class="fld" id="fld" type="tel" inputmode="numeric" placeholder="(27) 99823-3325" value="${ans.whatsapp||''}">
-    </div>`;
-  } else if(["text","email"].includes(s.type)){
-    bodyHTML=`<input class="fld" id="fld" type="${s.type}" placeholder="${s.placeholder||""}" value="${(ans[s.key]||"").replace(/"/g,'&quot;')}" autocomplete="off">`;
-  } else if(s.type==="textarea"){
+  if(s.type==="textarea"){
     bodyHTML=`<textarea class="fld" id="fld" placeholder="${s.placeholder||""}">${ans[s.key]||""}</textarea>`;
-    if(s.checkbox){const on=ans[s.checkKey]?"sel":"";bodyHTML+=`<div class="check ${on}" id="chk"><span class="mark"></span>${s.checkbox}</div>`;}
   } else {
     const sel=ans[s.key]||(s.type==="multi"?[]:null);
     bodyHTML=`<div class="opts">`+s.options.map((o,k)=>{
       const isSel=s.type==="multi"?sel.includes(o):sel===o;
       return `<button class="opt ${isSel?'sel':''}" data-multi="${s.type==='multi'?1:0}" data-o="${k}"><span class="mark"></span><span>${o}</span></button>`;
     }).join("")+`</div>`;
-    if(s.otherLabel){const show=(ans[s.key]||[]).includes(s.otherLabel);bodyHTML+=`<div class="reveal ${show?'on':''}" id="otherrev"><input class="fld" id="otherfld" placeholder="${s.otherPH||''}" value="${(ans[s.otherKey]||'').replace(/"/g,'&quot;')}"></div>`;}
   }
   app.innerHTML=`
     <div class="nav">
       <button class="back" id="back">&larr; Voltar</button>
       <div class="dots">${dots}</div>
-      <div class="count">${i+1} / ${list.length}</div>
+      <div class="count">${count}</div>
     </div>
     <div class="screen">
       <div class="eyebrow">${s.eyebrow}</div>
@@ -235,7 +202,7 @@ function render(){
       <div class="body">${bodyHTML}</div>
       <div class="foot">
         ${s.optional?'<button class="skip" id="skip" style="visibility:visible">Pular</button>':''}
-        <button class="next" id="next">Próxima</button>
+        <button class="next" id="next">${s.nextLabel||"Próxima"}</button>
       </div>
     </div>`;
   document.getElementById("back").style.visibility="visible";
@@ -248,19 +215,10 @@ function wire(s){
   back.onclick=()=>{i=Math.max(-1,i-1);render()};
   const skip=document.getElementById("skip"); if(skip) skip.onclick=go;
   const upd=()=>{ next.disabled=!valid(s); };
-  if(s.type==="tel"){
-    const ddi=document.getElementById("ddi"), f=document.getElementById("fld");
-    const reformat=()=>{ const d=f.value.replace(/\D/g,""); ans.ddi=ddi.value; ans.whatsapp_d=d;
-      ans.whatsapp=fmtPhone(ans.ddi,d); ans.whatsapp_full=ans.ddi+" "+ans.whatsapp; f.value=ans.whatsapp; upd(); };
-    ddi.onchange=reformat; f.oninput=reformat;
-    f.onkeydown=(e)=>{if(e.key==="Enter"&&!next.disabled)go()}; f.focus();
-  } else if(["text","email","textarea"].includes(s.type)){
+  if(s.type==="textarea"){
     const f=document.getElementById("fld"); f.focus();
     f.oninput=()=>{ans[s.key]=f.value;upd()};
-    f.onkeydown=(e)=>{if(e.key==="Enter"&&s.type!=="textarea"&&!next.disabled)go()};
-    if(s.checkbox){const c=document.getElementById("chk");c.onclick=()=>{ans[s.checkKey]=!ans[s.checkKey];c.classList.toggle("sel")}}
   } else {
-    const of=document.getElementById("otherfld"); if(of) of.oninput=()=>{ans[s.otherKey]=of.value};
     app.querySelectorAll(".opt").forEach(btn=>{
       btn.onclick=()=>{
         const o=s.options[btn.dataset.o];
@@ -269,7 +227,6 @@ function wire(s){
           const idx=ans[s.key].indexOf(o);
           if(idx>=0){ans[s.key].splice(idx,1);btn.classList.remove("sel")}
           else{ if(s.max&&ans[s.key].length>=s.max) return; ans[s.key].push(o);btn.classList.add("sel")}
-          if(s.otherLabel){const rev=document.getElementById("otherrev");rev.classList.toggle("on",ans[s.key].includes(s.otherLabel));}
           upd();
         } else {
           ans[s.key]=o;
@@ -286,11 +243,10 @@ function wire(s){
 
 function go(){
   const list=seq(); const s=list[i]; if(!valid(s)) return;
-  const n=s.n; i++;
+  i++;
   const list2=seq();
-  if(i>=list2.length) sendWebhook(n,"concluido");
-  else if(n===3) sendWebhook(n,"novo_lead");
-  else if(n>3) sendWebhook(n,"em_andamento");
+  if(i>=list2.length) sendWebhook(s.n,"concluido");
+  else sendWebhook(s.n,"em_andamento");
   render();
 }
 
@@ -300,13 +256,13 @@ function renderWelcome(){
     <div class="hero">
       <div class="kick">Fase 3 · Como vai receber</div>
       <h1>Quase lá. <span class="b ital">Última parte.</span></h1>
-      <p>Sua loja tá saindo do forno. Agora falta organizar a parte que mais importa: <b>como o euro vai cair na sua conta</b>. Em 1 minutinho a equipe entende seu cenário e te ajuda a deixar tudo pronto pra faturar.</p>
+      <p>${firstName()?firstName()+", sua":"Sua"} loja tá saindo do forno. Agora falta organizar a parte que mais importa: <b>como o euro vai cair na sua conta</b>. Em 1 minutinho a equipe entende seu cenário e te ajuda a deixar tudo pronto pra faturar.</p>
       <div class="herorow">
         <button class="start" id="start">Bora finalizar &rarr;</button>
         <span class="hint">3 perguntas · 1 min</span>
       </div>
     </div>`;
-  document.getElementById("start").onclick=()=>{i=0;render()};
+  document.getElementById("start").onclick=()=>{ if(!leadEnviado){sendWebhook(0,"novo_lead");leadEnviado=true;} i=0;render(); };
 }
 
 function renderFinal(){
