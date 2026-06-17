@@ -108,10 +108,9 @@ function renderWelcome(){
   app.innerHTML=`
     <div class="nav"></div>
     <div class="hero">
-      <div class="kick">Fase 3 · Vídeo final</div>
+      <div class="kick">Fase 3 · Última parte</div>
       <h1>Quase lá${n?", "+n:""}. <span class="b ital">Última parte.</span></h1>
-      <p>Em 1 minutinho a equipe te mostra como sua loja vai ficar pronta. <b>(O vídeo entra aqui em breve.)</b></p>
-      <div class="videobox"><div class="play">▶</div><span>Vídeo em breve</span></div>
+      <p>Tá tudo pronto do seu lado. Falta só a gente finalizar a sua loja e te chamar. Toca pra confirmar.</p>
       <button class="start" id="start">Continuar &rarr;</button>
     </div>`;
   document.getElementById("start").onclick=()=>{ sendWebhook("concluido"); renderFinal(); };
@@ -130,8 +129,8 @@ function renderFinal(){
         <div class="planc">
           <h4>Você (agora)</h4>
           <ul>
-            <li>Deixa sua conta de recebimento em euro pronta (Nomad)</li>
-            <li>Espera nosso WhatsApp em até 24 horas</li>
+            <li>Fica de olho no WhatsApp nas próximas 24 horas</li>
+            <li>Já vai separando os primeiros produtos que quer vender</li>
           </ul>
         </div>
         <div class="planc">
