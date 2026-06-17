@@ -84,6 +84,14 @@
   .upok{font:600 12px Inter;letter-spacing:.3px;color:#2e7d32;display:block;margin-top:2px}
   .uperr{font:500 14px Inter;color:#c0392b}
 
+  .plan{display:flex;flex-direction:column;gap:14px;max-width:520px;width:100%;margin:0 auto 6px;text-align:left}
+  .planc{border:1.5px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff}
+  .planc h4{font:600 12px Inter;letter-spacing:2px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:10px}
+  .planc ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .planc li{font:500 15px/1.4 Inter;color:#4a4651;padding-left:18px;position:relative}
+  .planc li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+  .notebar{display:flex;align-items:center;gap:10px;max-width:520px;width:100%;margin:18px auto 0;border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;padding:14px 18px;font:500 14.5px Inter;color:var(--gold-deep);text-align:left}
+
   .stepper{display:flex;flex-direction:column;gap:14px;margin-bottom:34px}
   .stp{display:flex;align-items:center;gap:13px;font:600 15px Inter;color:#4a4651}
   .stp .num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 13px Inter}
@@ -153,7 +161,8 @@ const STEPS=[
     options:["🔵 Azul","⚫ Preto & dourado","🟢 Verde","🔴 Vermelho","🟣 Roxo","🟡 Dourado / amarelo","Pode escolher pela equipe"]},
   {key:"conta_mais",n:6,type:"textarea",eyebrow:"Como você quer sua logo? · Pergunta 5 de 6",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre você?',sub:"Coisas que fazem sentido pra você: uma referência, uma frase, um sentimento. Pode pular.",placeholder:"Ex: quero algo que passe confiança e leveza.",optional:true,cond:a=>a.tem_logo===NAO},
   {key:"sensacao",n:7,type:"multi",pills:true,max:2,eyebrow:"Como você quer sua logo? · Pergunta 6 de 6",title:'Qual <span class="b ital">sensação</span> sua marca deve passar?',sub:"Escolha até 2.",cond:a=>a.tem_logo===NAO,
-    options:["Confiança","Acolhimento","Sofisticação","Energia","Autoridade","Exclusividade","Proximidade","Inovação","Resultado"]}
+    options:["Confiança","Acolhimento","Sofisticação","Energia","Autoridade","Exclusividade","Proximidade","Inovação","Resultado"]},
+  {key:"ultima_parte",n:8,type:"info",eyebrow:"Última parte",nextLabel:"Continuar",title:'Quase lá, {n}. <span class="b ital">Última parte.</span>',sub:"Tá tudo pronto do seu lado. Falta só a gente finalizar a sua loja e te chamar. Toca pra confirmar."}
 ];
 
 const app=document.getElementById("app");
@@ -209,7 +218,9 @@ function render(){
   if(i>=list.length){renderFinal();return}
   const s=list[i];
   let bodyHTML="";
-  if(s.type==="file"){
+  if(s.type==="info"){
+    bodyHTML=s.html||"";
+  } else if(s.type==="file"){
     const has=!!ans.logo_b64;
     bodyHTML=`<input type="file" id="filein" accept="image/*" style="display:none">
       <button type="button" class="uploadbtn" id="uploadbtn">📎 ${has?'Trocar imagem':'Escolher imagem da logo'}</button>
@@ -325,7 +336,7 @@ function renderWelcome(){
       <div class="stepper">
         <div class="stp done"><span class="num">✓</span> Te conhecemos</div>
         <div class="stp cur"><span class="num">02</span> Estilo da sua logo (agora)</div>
-        <div class="stp todo"><span class="num">03</span> Vídeo da equipe</div>
+        <div class="stp todo"><span class="num">03</span> Finalização</div>
       </div>
       <div class="herorow"><button class="start" id="start">Bora começar &rarr;</button></div>
     </div>`;
@@ -336,10 +347,15 @@ function renderFinal(){
   const n=firstName();
   app.innerHTML=`
     <div class="thanks">
-      <div class="wm">Fase 2</div>
-      <div class="eyebrow">Briefing enviado</div>
-      <h1>Agora é com a <span class="b ital">nossa equipe</span>.</h1>
-      <p>Recebemos tudo${n?", "+n:""}! O time já vai começar a desenhar a identidade da sua loja. Em breve a gente te chama no WhatsApp com as opções — e segue pra <b>Fase 3</b>, onde você organiza como vai receber em euro.</p>
+      <div class="wm">Pronto</div>
+      <div class="eyebrow">Obrigado${n?", "+n:""}</div>
+      <h1>Pronto! Agora é com a <span class="b ital">nossa equipe</span>.</h1>
+      <p>Nosso time está preparando sua loja. A gente te avisa pelo WhatsApp em até <b>24 horas</b>.</p>
+      <div class="plan">
+        <div class="planc"><h4>Você (agora)</h4><ul><li>Fica de olho no WhatsApp nas próximas 24 horas</li><li>Já vai separando os primeiros produtos que quer vender</li></ul></div>
+        <div class="planc"><h4>Nossa equipe (ao mesmo tempo)</h4><ul><li>Cria 3 opções de logo no seu jeito</li><li>Escreve a descrição da sua loja</li><li>Escolhe os fornecedores e produtos da sua loja</li></ul></div>
+      </div>
+      <div class="notebar">💬 A gente te avisa pelo WhatsApp em até 24 horas.</div>
       <div class="ty-end">Vem que a meta é euro!</div>
     </div>`;
 }
