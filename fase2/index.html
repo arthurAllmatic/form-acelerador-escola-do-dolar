@@ -196,8 +196,8 @@ function render(){
   if(i===-1){renderWelcome();return}
   if(i>=list.length){renderFinal();return}
   const s=list[i];
-  const dots=list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
-  const count=`${i+1} / ${list.length}`;
+  const dots="";
+  const count="";
   let bodyHTML="";
   if(s.type==="file"){
     const has=!!ans.logo_b64;
