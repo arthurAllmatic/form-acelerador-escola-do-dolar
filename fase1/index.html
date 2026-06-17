@@ -198,7 +198,7 @@ function render(){
   const s=list[i];
   const isInfo=s.type==="info";
   const dots=isInfo?"":list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
-  const count=isInfo?"":`${i+1} / ${list.length}`;
+  const count="";
   let bodyHTML="";
   if(s.type==="info"){
     bodyHTML=s.html||"";
