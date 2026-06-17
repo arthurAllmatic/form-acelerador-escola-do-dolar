@@ -52,10 +52,6 @@
   input.fld::placeholder,textarea.fld::placeholder{color:#b6bcc6}
   input.fld:focus,textarea.fld:focus,select.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
   textarea.fld{resize:none;min-height:120px;line-height:1.45}
-  .phone{display:flex;gap:10px}
-  select.ddi{width:130px;flex:0 0 auto;cursor:pointer;padding-right:10px;
-    -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a6470' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 14px center}
 
   .opts{display:flex;flex-direction:column;gap:11px}
   .opt{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
@@ -72,13 +68,12 @@
   .reveal{margin-top:12px;display:none}
   .reveal.on{display:block;animation:in .3s ease}
 
-  .check{display:inline-flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;
-    background:#fff;padding:14px 18px;font:500 15px Inter;cursor:pointer;margin-top:14px;transition:.16s}
-  .check .mark{width:21px;height:21px;border:1.8px solid #cfcabb;border-radius:6px;display:flex;align-items:center;
-    justify-content:center;color:#fff;font-size:13px;transition:.16s}
-  .check.sel{border-color:var(--gold);background:var(--gold-soft)}
-  .check.sel .mark{background:var(--gold);border-color:var(--gold)}
-  .check.sel .mark::after{content:"\2713"}
+  .plan{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .planc{border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff}
+  .planc h4{font:600 11px Inter;letter-spacing:2px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:9px}
+  .planc ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .planc li{font:500 14.5px/1.4 Inter;color:#4a4651;padding-left:17px;position:relative}
+  .planc li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--grad)}
 
   .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:32px 0 8px;margin-top:auto}
   .skip{background:none;border:none;color:var(--muted);font:600 13px Inter;cursor:pointer;visibility:hidden}
@@ -123,40 +118,48 @@
 
 <script>
 const FASE="fase1", FORMULARIO="reconhecimento";
-const DDIS=[["Brasil","+55","🇧🇷"],["Portugal","+351","🇵🇹"],["EUA / Canadá","+1","🇺🇸"],["Espanha","+34","🇪🇸"],["Reino Unido","+44","🇬🇧"],
-  ["Itália","+39","🇮🇹"],["França","+33","🇫🇷"],["Alemanha","+49","🇩🇪"],["Irlanda","+353","🇮🇪"],["Argentina","+54","🇦🇷"],["México","+52","🇲🇽"],
-  ["Austrália","+61","🇦🇺"],["Japão","+81","🇯🇵"],["Outro","+","🌐"]];
+const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+
+/* Identidade vem da URL (ex: ?nome=Maria&email=maria@x.com&whatsapp=27998233325) */
+const Q=new URLSearchParams(location.search);
+function qp(){for(const k of arguments){const v=Q.get(k);if(v)return v;}return "";}
 
 const STEPS=[
-  {key:"nome",n:1,type:"text",eyebrow:"Nome",title:'Primeiro, como você <span class="b ital">se chama</span>?',placeholder:"Ex: Mariana Souza"},
-  {key:"email",n:2,type:"email",eyebrow:"E-mail",title:'Qual e-mail você usou na <span class="b ital">Hotmart</span>?',placeholder:"voce@email.com"},
-  {key:"whatsapp",n:3,type:"tel",eyebrow:"WhatsApp",title:'Seu melhor <span class="b ital">WhatsApp</span> (com DDD)',sub:"É por aqui que a equipe te chama quando a sua loja tá pronta."},
-  {key:"experiencia",n:4,type:"single",eyebrow:"Reconhecimento · 1 de 5",title:'{n}, você já <span class="b ital">vende online</span> hoje?',sub:"Isso ajuda a equipe a montar uma loja do seu jeito.",
+  {key:"plano",n:1,type:"info",eyebrow:"O plano",nextLabel:"Começar agora",title:'Sua loja pronta em <span class="b ital">3 partes</span>.',sub:"No seu ritmo. A equipe te explica cada parte na hora certa.",
+    html:`<div class="plan">
+      <div class="planc"><h4>Parte 1 · agora</h4><ul><li>Você: responde esse reconhecimento (~2 min)</li><li>Equipe: valida o nicho e desenha sua loja</li></ul></div>
+      <div class="planc"><h4>Parte 2 · sua logo</h4><ul><li>Você: faz o briefing da identidade</li><li>Equipe: cria 3 opções de logo no seu jeito</li></ul></div>
+      <div class="planc"><h4>Parte 3 · pra faturar</h4><ul><li>Você: deixa o recebimento em euro pronto</li><li>Equipe: entrega a loja nichada e validada</li></ul></div>
+    </div>`},
+  {key:"experiencia",n:2,type:"single",eyebrow:"Reconhecimento · 1 de 5",title:'{n}, você já <span class="b ital">vende online</span> hoje?',sub:"Isso ajuda a equipe a montar uma loja do seu jeito.",
     options:["Sim, já vendo na Shopify","Vendo em outro lugar (Instagram, marketplace…)","Já tive loja e parei","Nunca vendi online"]},
-  {key:"motivo",n:5,type:"multi",eyebrow:"Reconhecimento · 2 de 5",title:'Por que você entrou no <span class="b ital">Acelerador</span>?',sub:"Pode marcar mais de uma.",otherLabel:"Outro motivo",otherKey:"motivo_outro",otherPH:"Conta pra gente…",
+  {key:"motivo",n:3,type:"multi",eyebrow:"Reconhecimento · 2 de 5",title:'Por que você entrou no <span class="b ital">Acelerador</span>?',sub:"Pode marcar mais de uma.",otherLabel:"Outro motivo",otherKey:"motivo_outro",otherPH:"Conta pra gente…",
     options:["Faturar em euro","Não depender de chefe","Trabalhar no meu horário","Sair do trabalho fixo","Ter meu próprio negócio","Confio na metodologia da Escola","Outro motivo"]},
-  {key:"trava",n:6,type:"single",eyebrow:"Reconhecimento · 3 de 5",title:'Hoje, o que mais <span class="b ital">te trava</span> pra vender pra fora?',sub:"Escolha o ponto que mais pesa agora.",
+  {key:"trava",n:4,type:"single",eyebrow:"Reconhecimento · 3 de 5",title:'Hoje, o que mais <span class="b ital">te trava</span> pra vender pra fora?',sub:"Escolha o ponto que mais pesa agora.",
     options:["Escolher bons produtos","Configurar a loja (parte técnica)","Criar anúncios que vendem","Medo de errar e perder tempo/dinheiro","Falta de tempo","Não saber por onde começar"]},
-  {key:"categoria",n:7,type:"single",eyebrow:"Reconhecimento · 4 de 5",title:'Qual <span class="b ital">nicho</span> combina mais com você?',sub:"A equipe valida e monta a melhor loja pro seu perfil.",
+  {key:"categoria",n:5,type:"single",eyebrow:"Reconhecimento · 4 de 5",title:'Qual <span class="b ital">nicho</span> combina mais com você?',sub:"A equipe valida e monta a melhor loja pro seu perfil.",
     options:["🧬 Longevidade","⚡ Vitalidade","🧔 Saúde Masculina","Escolha pra mim — confio na equipe"]},
-  {key:"tempo",n:8,type:"single",eyebrow:"Reconhecimento · 5 de 5",title:'Quanto <span class="b ital">tempo por dia</span> você consegue tirar pra isso?',sub:"Não tem resposta certa. Só ajuda a gente a planejar.",
+  {key:"tempo",n:6,type:"single",eyebrow:"Reconhecimento · 5 de 5",title:'Quanto <span class="b ital">tempo por dia</span> você consegue tirar pra isso?',sub:"Não tem resposta certa. Só ajuda a gente a planejar.",
     options:["Menos de 1h","1 a 2h","3 a 4h","5h ou mais"]},
-  {key:"obs",n:9,type:"textarea",eyebrow:"Opcional",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre você?',placeholder:"Pode escrever do seu jeito. Pode pular se quiser.",optional:true}
+  {key:"obs",n:7,type:"textarea",eyebrow:"Opcional",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre você?',placeholder:"Pode escrever do seu jeito. Pode pular se quiser.",optional:true}
 ];
 
 const app=document.getElementById("app");
-const ans={ddi:"+55", _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8))};
-let i=-1;
+const ans={
+  _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)),
+  nome:qp("nome","name","first_name","fname","primeiro_nome"),
+  email:qp("email","mail","e-mail"),
+  whatsapp:qp("whatsapp","telefone","phone","wpp","celular","tel","fone"),
+  ddi:qp("ddi")||"+55"
+};
+let i=-1, leadEnviado=false;
 
 function seq(){ return STEPS.filter(s=>!s.cond||s.cond(ans)); }
 
-const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
 function buildPayload(step,status){
   return {
     id:ans._id, fase:FASE, formulario:FORMULARIO, step:step, status:status,
-    nome:ans.nome||"", email:(ans.email||"").trim(),
-    whatsapp:ans.whatsapp_full||((ans.ddi||"")+" "+(ans.whatsapp||"")).trim(),
-    ddi:ans.ddi||"", whatsapp_numero:ans.whatsapp||"",
+    nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
     respostas:{
       ja_vende:ans.experiencia||null, motivo:ans.motivo||null, motivo_outro:ans.motivo_outro||null,
       o_que_trava:ans.trava||null, nicho:ans.categoria||null, disponibilidade:ans.tempo||null,
@@ -167,9 +170,10 @@ function buildPayload(step,status){
 }
 function sendWebhook(step,status){
   try{
-    fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
-      headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify(buildPayload(step,status))});
+    const body=JSON.stringify(buildPayload(step,status));
+    const opt={method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body};
+    if(body.length<60000) opt.keepalive=true;
+    fetch(WEBHOOK,opt);
   }catch(e){}
 }
 
@@ -178,22 +182,11 @@ function tok(s){ if(!s) return s; const n=firstName();
   if(n) return s.replace(/\{n\}/g,n);
   return s.replace(/,?\s*\{n\}\s*,?/g," ").replace(/\s{2,}/g," ").replace(/\s+([.!?—])/g,"$1").trim(); }
 
-function emailOk(v){return /.+@.+\..+/.test(v)}
-function fmtPhone(ddi,d){
-  if(ddi==="+55"){ d=d.slice(0,11);
-    if(d.length<=2) return d;
-    if(d.length<=6) return "("+d.slice(0,2)+") "+d.slice(2);
-    if(d.length<=10) return "("+d.slice(0,2)+") "+d.slice(2,6)+"-"+d.slice(6);
-    return "("+d.slice(0,2)+") "+d.slice(2,7)+"-"+d.slice(7,11); }
-  d=d.slice(0,15); return d.replace(/(.{3})(?=.)/g,"$1 ").trim();
-}
 function valid(step){
-  if(step.optional) return true;
+  if(step.optional||step.type==="info") return true;
   const v=ans[step.key];
   if(step.type==="multi") return Array.isArray(v)&&v.length>0;
   if(step.type==="single") return !!v;
-  if(step.type==="email") return emailOk((v||"").trim());
-  if(step.type==="tel") return (ans.whatsapp_d||"").length>=(ans.ddi==="+55"?10:8);
   return (v||"").trim().length>1;
 }
 
@@ -203,18 +196,14 @@ function render(){
   if(i===-1){renderWelcome();return}
   if(i>=list.length){renderFinal();return}
   const s=list[i];
-  const dots=list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
+  const isInfo=s.type==="info";
+  const dots=isInfo?"":list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
+  const count=isInfo?"":`${i+1} / ${list.length}`;
   let bodyHTML="";
-  if(s.type==="tel"){
-    bodyHTML=`<div class="phone">
-      <select class="fld ddi" id="ddi">${DDIS.map(([nm,c,f])=>`<option value="${c}" ${c===ans.ddi?'selected':''}>${f} ${c}</option>`).join("")}</select>
-      <input class="fld" id="fld" type="tel" inputmode="numeric" placeholder="(27) 99823-3325" value="${ans.whatsapp||''}">
-    </div>`;
-  } else if(["text","email"].includes(s.type)){
-    bodyHTML=`<input class="fld" id="fld" type="${s.type}" placeholder="${s.placeholder||""}" value="${(ans[s.key]||"").replace(/"/g,'&quot;')}" autocomplete="off">`;
+  if(s.type==="info"){
+    bodyHTML=s.html||"";
   } else if(s.type==="textarea"){
     bodyHTML=`<textarea class="fld" id="fld" placeholder="${s.placeholder||""}">${ans[s.key]||""}</textarea>`;
-    if(s.checkbox){const on=ans[s.checkKey]?"sel":"";bodyHTML+=`<div class="check ${on}" id="chk"><span class="mark"></span>${s.checkbox}</div>`;}
   } else {
     const sel=ans[s.key]||(s.type==="multi"?[]:null);
     bodyHTML=`<div class="opts">`+s.options.map((o,k)=>{
@@ -227,7 +216,7 @@ function render(){
     <div class="nav">
       <button class="back" id="back">&larr; Voltar</button>
       <div class="dots">${dots}</div>
-      <div class="count">${i+1} / ${list.length}</div>
+      <div class="count">${count}</div>
     </div>
     <div class="screen">
       <div class="eyebrow">${s.eyebrow}</div>
@@ -236,7 +225,7 @@ function render(){
       <div class="body">${bodyHTML}</div>
       <div class="foot">
         ${s.optional?'<button class="skip" id="skip" style="visibility:visible">Pular</button>':''}
-        <button class="next" id="next">Próxima</button>
+        <button class="next" id="next">${s.nextLabel||"Próxima"}</button>
       </div>
     </div>`;
   document.getElementById("back").style.visibility="visible";
@@ -249,18 +238,10 @@ function wire(s){
   back.onclick=()=>{i=Math.max(-1,i-1);render()};
   const skip=document.getElementById("skip"); if(skip) skip.onclick=go;
   const upd=()=>{ next.disabled=!valid(s); };
-  if(s.type==="tel"){
-    const ddi=document.getElementById("ddi"), f=document.getElementById("fld");
-    const reformat=()=>{ const d=f.value.replace(/\D/g,""); ans.ddi=ddi.value; ans.whatsapp_d=d;
-      ans.whatsapp=fmtPhone(ans.ddi,d); ans.whatsapp_full=ans.ddi+" "+ans.whatsapp; f.value=ans.whatsapp; upd(); };
-    ddi.onchange=reformat; f.oninput=reformat;
-    f.onkeydown=(e)=>{if(e.key==="Enter"&&!next.disabled)go()}; f.focus();
-  } else if(["text","email","textarea"].includes(s.type)){
+  if(s.type==="textarea"){
     const f=document.getElementById("fld"); f.focus();
     f.oninput=()=>{ans[s.key]=f.value;upd()};
-    f.onkeydown=(e)=>{if(e.key==="Enter"&&s.type!=="textarea"&&!next.disabled)go()};
-    if(s.checkbox){const c=document.getElementById("chk");c.onclick=()=>{ans[s.checkKey]=!ans[s.checkKey];c.classList.toggle("sel")}}
-  } else {
+  } else if(s.type!=="info"){
     const of=document.getElementById("otherfld"); if(of) of.oninput=()=>{ans[s.otherKey]=of.value};
     app.querySelectorAll(".opt").forEach(btn=>{
       btn.onclick=()=>{
@@ -287,11 +268,10 @@ function wire(s){
 
 function go(){
   const list=seq(); const s=list[i]; if(!valid(s)) return;
-  const n=s.n; i++;
+  i++;
   const list2=seq();
-  if(i>=list2.length) sendWebhook(n,"concluido");
-  else if(n===3) sendWebhook(n,"novo_lead");
-  else if(n>3) sendWebhook(n,"em_andamento");
+  if(i>=list2.length) sendWebhook(s.n,"concluido");
+  else sendWebhook(s.n,"em_andamento");
   render();
 }
 
@@ -301,13 +281,13 @@ function renderWelcome(){
     <div class="hero">
       <div class="kick">Fase 1 · Reconhecimento</div>
       <h1>Bora montar a <span class="b">sua</span> loja pra faturar em <span class="b ital">euro</span>?</h1>
-      <p>Você já garantiu o Acelerador — o passo que separa quem sonha de quem faz. Essa é a <b>Fase 1</b>: a equipe vai te conhecer pra montar uma <b>loja nichada e validada</b> pro seu perfil (nada de loja genérica). São 2 minutos. Vem junto que a meta é euro.</p>
+      <p>${firstName()?firstName()+", você":"Você"} já garantiu o Acelerador — o passo que separa quem sonha de quem faz. Essa é a <b>Fase 1</b>: a equipe vai te conhecer pra montar uma <b>loja nichada e validada</b> pro seu perfil (nada de loja genérica). São 2 minutos. Vem junto que a meta é euro.</p>
       <div class="herorow">
         <button class="start" id="start">Bora começar &rarr;</button>
-        <span class="hint">9 perguntas · 2 min</span>
+        <span class="hint">2 min</span>
       </div>
     </div>`;
-  document.getElementById("start").onclick=()=>{i=0;render()};
+  document.getElementById("start").onclick=()=>{ if(!leadEnviado){sendWebhook(0,"novo_lead");leadEnviado=true;} i=0;render(); };
 }
 
 function renderFinal(){
