@@ -52,10 +52,6 @@
   input.fld::placeholder,textarea.fld::placeholder{color:#b6bcc6}
   input.fld:focus,textarea.fld:focus,select.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
   textarea.fld{resize:none;min-height:120px;line-height:1.45}
-  .phone{display:flex;gap:10px}
-  select.ddi{width:130px;flex:0 0 auto;cursor:pointer;padding-right:10px;
-    -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a6470' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 14px center}
 
   .opts{display:flex;flex-direction:column;gap:11px}
   .opt{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
@@ -72,13 +68,15 @@
   .reveal{margin-top:12px;display:none}
   .reveal.on{display:block;animation:in .3s ease}
 
-  .check{display:inline-flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;
-    background:#fff;padding:14px 18px;font:500 15px Inter;cursor:pointer;margin-top:14px;transition:.16s}
-  .check .mark{width:21px;height:21px;border:1.8px solid #cfcabb;border-radius:6px;display:flex;align-items:center;
-    justify-content:center;color:#fff;font-size:13px;transition:.16s}
-  .check.sel{border-color:var(--gold);background:var(--gold-soft)}
-  .check.sel .mark{background:var(--gold);border-color:var(--gold)}
-  .check.sel .mark::after{content:"\2713"}
+  .uploadbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;cursor:pointer;
+    border:1.8px dashed var(--gold-line);border-radius:16px;background:var(--gold-soft);
+    padding:30px 18px;font:600 15px Inter;color:var(--gold-deep);transition:.16s}
+  .uploadbtn:hover{border-color:var(--gold);background:#fbf0d8}
+  .upinfo{margin-top:14px;display:flex;align-items:center;gap:14px;min-height:0}
+  .upthumb{width:64px;height:64px;object-fit:contain;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:6px}
+  .upname{font:500 14px Inter;color:var(--ink);word-break:break-all}
+  .upok{font:600 12px Inter;letter-spacing:.3px;color:#2e7d32;display:block;margin-top:2px}
+  .uperr{font:500 14px Inter;color:#c0392b}
 
   .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:32px 0 8px;margin-top:auto}
   .skip{background:none;border:none;color:var(--muted);font:600 13px Inter;cursor:pointer;visibility:hidden}
@@ -123,56 +121,59 @@
 
 <script>
 const FASE="fase2", FORMULARIO="briefing_logo";
-const DDIS=[["Brasil","+55","🇧🇷"],["Portugal","+351","🇵🇹"],["EUA / Canadá","+1","🇺🇸"],["Espanha","+34","🇪🇸"],["Reino Unido","+44","🇬🇧"],
-  ["Itália","+39","🇮🇹"],["França","+33","🇫🇷"],["Alemanha","+49","🇩🇪"],["Irlanda","+353","🇮🇪"],["Argentina","+54","🇦🇷"],["México","+52","🇲🇽"],
-  ["Austrália","+61","🇦🇺"],["Japão","+81","🇯🇵"],["Outro","+","🌐"]];
+const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+
+/* Identidade vem da URL (ex: ?nome=Maria&email=maria@x.com&whatsapp=27998233325) */
+const Q=new URLSearchParams(location.search);
+function qp(){for(const k of arguments){const v=Q.get(k);if(v)return v;}return "";}
 
 const TEM_LOGO_SIM="Já tenho a minha logo";
 const TEM_LOGO_NAO="Quero que a equipe crie pra mim";
 
 const STEPS=[
-  {key:"nome",n:1,type:"text",eyebrow:"Nome",title:'Pra começar, como você <span class="b ital">se chama</span>?',placeholder:"Ex: Mariana Souza"},
-  {key:"email",n:2,type:"email",eyebrow:"E-mail",title:'Qual e-mail você usou na <span class="b ital">Hotmart</span>?',sub:"É como a equipe liga esse briefing ao seu cadastro.",placeholder:"voce@email.com"},
-  {key:"whatsapp",n:3,type:"tel",eyebrow:"WhatsApp",title:'Confirma seu <span class="b ital">WhatsApp</span> (com DDD)',sub:"É por aqui que a gente fala sobre a sua logo."},
-  {key:"nome_loja",n:4,type:"text",eyebrow:"Sua logo · 1 de 6",title:'{n}, como sua loja vai <span class="b ital">se chamar</span>?',sub:"Pode mudar depois. De 3 a 30 letras.",placeholder:"Ex: Vitalle Co."},
-  {key:"tem_logo",n:5,type:"single",eyebrow:"Sua logo · 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span>?',sub:"Vai mandar a sua ou quer que a equipe crie?",
+  {key:"nome_loja",n:1,type:"text",eyebrow:"Sua logo · 1 de 6",title:'{n}, como sua loja vai <span class="b ital">se chamar</span>?',sub:"Pode mudar depois. De 3 a 30 letras.",placeholder:"Ex: Vitalle Co."},
+  {key:"tem_logo",n:2,type:"single",eyebrow:"Sua logo · 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span>?',sub:"Vai mandar a sua ou quer que a equipe crie?",
     options:[TEM_LOGO_SIM,TEM_LOGO_NAO]},
-  {key:"logo_obs",n:6,type:"textarea",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">mandar a sua</span>.',sub:"Assim que terminar, envie o arquivo (PNG/JPG, de preferência com fundo transparente) pra equipe no WhatsApp. Quer deixar alguma observação?",placeholder:"Ex: tenho em PNG, mando hoje. Pode pular se quiser.",optional:true,cond:a=>a.tem_logo===TEM_LOGO_SIM},
-  {key:"estilo",n:7,type:"single",eyebrow:"Sua logo · 3 de 6",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais tem a ver com você.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
+  {key:"logo",n:3,type:"file",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">subir a sua</span>.',sub:"Toque pra escolher o arquivo da sua logo (PNG ou JPG, de preferência com fundo transparente). Máx 4 MB.",cond:a=>a.tem_logo===TEM_LOGO_SIM,optional:true},
+  {key:"estilo",n:4,type:"single",eyebrow:"Sua logo · 3 de 6",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais tem a ver com você.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
     options:["Elegante — sofisticado, atemporal","Moderno — clean, com ar tech","Natural — orgânico, terroso","Jovem — colorido, animado","Profissional — confiável, sério","Minimalista — direto ao ponto"]},
-  {key:"cor",n:8,type:"single",eyebrow:"Sua logo · 4 de 6",title:'Qual <span class="b ital">cor principal</span> você quer?',sub:"Pode escolher uma ou deixar com a equipe.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
+  {key:"cor",n:5,type:"single",eyebrow:"Sua logo · 4 de 6",title:'Qual <span class="b ital">cor principal</span> você quer?',sub:"Pode escolher uma ou deixar com a equipe.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
     options:["🔵 Azul","⚫ Preto & dourado","🟢 Verde","🔴 Vermelho","🟣 Roxo","🟡 Dourado / amarelo","Pode escolher pela equipe"]},
-  {key:"conta_mais",n:9,type:"textarea",eyebrow:"Sua logo · 5 de 6",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre a marca?',sub:"Algo que faça sentido pra você: uma referência, uma frase, um sentimento. Pode pular.",placeholder:"Ex: quero algo que passe confiança e leveza.",optional:true,cond:a=>a.tem_logo===TEM_LOGO_NAO},
-  {key:"sensacao",n:10,type:"multi",max:2,eyebrow:"Sua logo · 6 de 6",title:'Qual <span class="b ital">sensação</span> sua marca deve passar?',sub:"Escolha até 2.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
+  {key:"conta_mais",n:6,type:"textarea",eyebrow:"Sua logo · 5 de 6",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre a marca?',sub:"Algo que faça sentido pra você: uma referência, uma frase, um sentimento. Pode pular.",placeholder:"Ex: quero algo que passe confiança e leveza.",optional:true,cond:a=>a.tem_logo===TEM_LOGO_NAO},
+  {key:"sensacao",n:7,type:"multi",max:2,eyebrow:"Sua logo · 6 de 6",title:'Qual <span class="b ital">sensação</span> sua marca deve passar?',sub:"Escolha até 2.",cond:a=>a.tem_logo===TEM_LOGO_NAO,
     options:["Confiança","Autoridade","Sofisticação","Energia","Proximidade","Exclusividade","Inovação","Resultado"]}
 ];
 
 const app=document.getElementById("app");
-const ans={ddi:"+55", _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8))};
-let i=-1;
+const ans={
+  _id:(self.crypto&&crypto.randomUUID?crypto.randomUUID():"lead_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)),
+  nome:qp("nome","name","first_name","fname","primeiro_nome"),
+  email:qp("email","mail","e-mail"),
+  whatsapp:qp("whatsapp","telefone","phone","wpp","celular","tel","fone"),
+  ddi:qp("ddi")||"+55"
+};
+let i=-1, leadEnviado=false;
 
 function seq(){ return STEPS.filter(s=>!s.cond||s.cond(ans)); }
 
-const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
 function buildPayload(step,status){
   return {
     id:ans._id, fase:FASE, formulario:FORMULARIO, step:step, status:status,
-    nome:ans.nome||"", email:(ans.email||"").trim(),
-    whatsapp:ans.whatsapp_full||((ans.ddi||"")+" "+(ans.whatsapp||"")).trim(),
-    ddi:ans.ddi||"", whatsapp_numero:ans.whatsapp||"",
+    nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
     respostas:{
-      nome_loja:ans.nome_loja||null, tem_logo:ans.tem_logo||null, logo_obs:ans.logo_obs||null,
-      estilo:ans.estilo||null, cor:ans.cor||null, conta_mais:ans.conta_mais||null,
-      sensacao:ans.sensacao||null
+      nome_loja:ans.nome_loja||null, tem_logo:ans.tem_logo||null,
+      logo_arquivo:ans.logo_nome||null, logo_mime:ans.logo_mime||null, logo_base64:ans.logo_b64||null,
+      estilo:ans.estilo||null, cor:ans.cor||null, conta_mais:ans.conta_mais||null, sensacao:ans.sensacao||null
     },
     atualizado_em:new Date().toISOString()
   };
 }
 function sendWebhook(step,status){
   try{
-    fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
-      headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify(buildPayload(step,status))});
+    const body=JSON.stringify(buildPayload(step,status));
+    const opt={method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body};
+    if(body.length<60000) opt.keepalive=true;
+    fetch(WEBHOOK,opt);
   }catch(e){}
 }
 
@@ -181,22 +182,11 @@ function tok(s){ if(!s) return s; const n=firstName();
   if(n) return s.replace(/\{n\}/g,n);
   return s.replace(/,?\s*\{n\}\s*,?/g," ").replace(/\s{2,}/g," ").replace(/\s+([.!?—])/g,"$1").trim(); }
 
-function emailOk(v){return /.+@.+\..+/.test(v)}
-function fmtPhone(ddi,d){
-  if(ddi==="+55"){ d=d.slice(0,11);
-    if(d.length<=2) return d;
-    if(d.length<=6) return "("+d.slice(0,2)+") "+d.slice(2);
-    if(d.length<=10) return "("+d.slice(0,2)+") "+d.slice(2,6)+"-"+d.slice(6);
-    return "("+d.slice(0,2)+") "+d.slice(2,7)+"-"+d.slice(7,11); }
-  d=d.slice(0,15); return d.replace(/(.{3})(?=.)/g,"$1 ").trim();
-}
 function valid(step){
-  if(step.optional) return true;
+  if(step.optional||step.type==="info"||step.type==="file") return true;
   const v=ans[step.key];
   if(step.type==="multi") return Array.isArray(v)&&v.length>0;
   if(step.type==="single") return !!v;
-  if(step.type==="email") return emailOk((v||"").trim());
-  if(step.type==="tel") return (ans.whatsapp_d||"").length>=(ans.ddi==="+55"?10:8);
   return (v||"").trim().length>1;
 }
 
@@ -207,30 +197,29 @@ function render(){
   if(i>=list.length){renderFinal();return}
   const s=list[i];
   const dots=list.map((_,k)=>`<span class="dot ${k<i?'done':''} ${k===i?'cur':''}"></span>`).join("");
+  const count=`${i+1} / ${list.length}`;
   let bodyHTML="";
-  if(s.type==="tel"){
-    bodyHTML=`<div class="phone">
-      <select class="fld ddi" id="ddi">${DDIS.map(([nm,c,f])=>`<option value="${c}" ${c===ans.ddi?'selected':''}>${f} ${c}</option>`).join("")}</select>
-      <input class="fld" id="fld" type="tel" inputmode="numeric" placeholder="(27) 99823-3325" value="${ans.whatsapp||''}">
-    </div>`;
-  } else if(["text","email"].includes(s.type)){
-    bodyHTML=`<input class="fld" id="fld" type="${s.type}" placeholder="${s.placeholder||""}" value="${(ans[s.key]||"").replace(/"/g,'&quot;')}" autocomplete="off">`;
+  if(s.type==="file"){
+    const has=!!ans.logo_b64;
+    bodyHTML=`<input type="file" id="filein" accept="image/*" style="display:none">
+      <button type="button" class="uploadbtn" id="uploadbtn">📎 ${has?'Trocar imagem':'Escolher imagem da logo'}</button>
+      <div class="upinfo" id="upinfo">${has?`<img class="upthumb" src="${ans.logo_b64}"><span class="upname">${ans.logo_nome}<span class="upok">✓ Anexada</span></span>`:''}</div>`;
+  } else if(["text"].includes(s.type)){
+    bodyHTML=`<input class="fld" id="fld" type="text" placeholder="${s.placeholder||""}" value="${(ans[s.key]||"").replace(/"/g,'&quot;')}" autocomplete="off">`;
   } else if(s.type==="textarea"){
     bodyHTML=`<textarea class="fld" id="fld" placeholder="${s.placeholder||""}">${ans[s.key]||""}</textarea>`;
-    if(s.checkbox){const on=ans[s.checkKey]?"sel":"";bodyHTML+=`<div class="check ${on}" id="chk"><span class="mark"></span>${s.checkbox}</div>`;}
   } else {
     const sel=ans[s.key]||(s.type==="multi"?[]:null);
     bodyHTML=`<div class="opts">`+s.options.map((o,k)=>{
       const isSel=s.type==="multi"?sel.includes(o):sel===o;
       return `<button class="opt ${isSel?'sel':''}" data-multi="${s.type==='multi'?1:0}" data-o="${k}"><span class="mark"></span><span>${o}</span></button>`;
     }).join("")+`</div>`;
-    if(s.otherLabel){const show=(ans[s.key]||[]).includes(s.otherLabel);bodyHTML+=`<div class="reveal ${show?'on':''}" id="otherrev"><input class="fld" id="otherfld" placeholder="${s.otherPH||''}" value="${(ans[s.otherKey]||'').replace(/"/g,'&quot;')}"></div>`;}
   }
   app.innerHTML=`
     <div class="nav">
       <button class="back" id="back">&larr; Voltar</button>
       <div class="dots">${dots}</div>
-      <div class="count">${i+1} / ${list.length}</div>
+      <div class="count">${count}</div>
     </div>
     <div class="screen">
       <div class="eyebrow">${s.eyebrow}</div>
@@ -239,7 +228,7 @@ function render(){
       <div class="body">${bodyHTML}</div>
       <div class="foot">
         ${s.optional?'<button class="skip" id="skip" style="visibility:visible">Pular</button>':''}
-        <button class="next" id="next">Próxima</button>
+        <button class="next" id="next">${s.nextLabel||"Próxima"}</button>
       </div>
     </div>`;
   document.getElementById("back").style.visibility="visible";
@@ -252,19 +241,23 @@ function wire(s){
   back.onclick=()=>{i=Math.max(-1,i-1);render()};
   const skip=document.getElementById("skip"); if(skip) skip.onclick=go;
   const upd=()=>{ next.disabled=!valid(s); };
-  if(s.type==="tel"){
-    const ddi=document.getElementById("ddi"), f=document.getElementById("fld");
-    const reformat=()=>{ const d=f.value.replace(/\D/g,""); ans.ddi=ddi.value; ans.whatsapp_d=d;
-      ans.whatsapp=fmtPhone(ans.ddi,d); ans.whatsapp_full=ans.ddi+" "+ans.whatsapp; f.value=ans.whatsapp; upd(); };
-    ddi.onchange=reformat; f.oninput=reformat;
-    f.onkeydown=(e)=>{if(e.key==="Enter"&&!next.disabled)go()}; f.focus();
-  } else if(["text","email","textarea"].includes(s.type)){
+  if(s.type==="file"){
+    const fi=document.getElementById("filein"), ub=document.getElementById("uploadbtn"), info=document.getElementById("upinfo");
+    ub.onclick=()=>fi.click();
+    fi.onchange=()=>{
+      const f=fi.files[0]; if(!f) return;
+      if(f.size>4*1024*1024){ info.innerHTML='<span class="uperr">Imagem muito grande (máx 4 MB). Tenta outra ou manda no WhatsApp.</span>'; return; }
+      const r=new FileReader();
+      r.onload=()=>{ ans.logo_b64=r.result; ans.logo_nome=f.name; ans.logo_mime=f.type;
+        info.innerHTML=`<img class="upthumb" src="${r.result}"><span class="upname">${f.name}<span class="upok">✓ Anexada</span></span>`;
+        ub.textContent="📎 Trocar imagem"; upd(); };
+      r.readAsDataURL(f);
+    };
+  } else if(["text","textarea"].includes(s.type)){
     const f=document.getElementById("fld"); f.focus();
     f.oninput=()=>{ans[s.key]=f.value;upd()};
     f.onkeydown=(e)=>{if(e.key==="Enter"&&s.type!=="textarea"&&!next.disabled)go()};
-    if(s.checkbox){const c=document.getElementById("chk");c.onclick=()=>{ans[s.checkKey]=!ans[s.checkKey];c.classList.toggle("sel")}}
   } else {
-    const of=document.getElementById("otherfld"); if(of) of.oninput=()=>{ans[s.otherKey]=of.value};
     app.querySelectorAll(".opt").forEach(btn=>{
       btn.onclick=()=>{
         const o=s.options[btn.dataset.o];
@@ -273,7 +266,6 @@ function wire(s){
           const idx=ans[s.key].indexOf(o);
           if(idx>=0){ans[s.key].splice(idx,1);btn.classList.remove("sel")}
           else{ if(s.max&&ans[s.key].length>=s.max) return; ans[s.key].push(o);btn.classList.add("sel")}
-          if(s.otherLabel){const rev=document.getElementById("otherrev");rev.classList.toggle("on",ans[s.key].includes(s.otherLabel));}
           upd();
         } else {
           ans[s.key]=o;
@@ -290,11 +282,10 @@ function wire(s){
 
 function go(){
   const list=seq(); const s=list[i]; if(!valid(s)) return;
-  const n=s.n; i++;
+  i++;
   const list2=seq();
-  if(i>=list2.length) sendWebhook(n,"concluido");
-  else if(n===3) sendWebhook(n,"novo_lead");
-  else if(n>3) sendWebhook(n,"em_andamento");
+  if(i>=list2.length) sendWebhook(s.n,"concluido");
+  else sendWebhook(s.n,"em_andamento");
   render();
 }
 
@@ -304,13 +295,13 @@ function renderWelcome(){
     <div class="hero">
       <div class="kick">Fase 2 · Sua logo</div>
       <h1>Hora de pensar na <span class="b ital">cara</span> da sua loja.</h1>
-      <p>Boa! A equipe já te conhece. Agora é a <b>Fase 2</b>: um briefing rapidinho pra criar a identidade da sua loja. Você responde algumas perguntas e a equipe usa pra fazer <b>3 opções de logo</b> no seu jeito. Bora deixar sua loja com cara de marca de verdade.</p>
+      <p>${firstName()?firstName()+", boa":"Boa"}! A equipe já te conhece. Agora é a <b>Fase 2</b>: um briefing rapidinho pra criar a identidade da sua loja. Você responde algumas perguntas e a equipe usa pra fazer <b>3 opções de logo</b> no seu jeito. Bora deixar sua loja com cara de marca de verdade.</p>
       <div class="herorow">
         <button class="start" id="start">Bora começar &rarr;</button>
         <span class="hint">Briefing · 2 min</span>
       </div>
     </div>`;
-  document.getElementById("start").onclick=()=>{i=0;render()};
+  document.getElementById("start").onclick=()=>{ if(!leadEnviado){sendWebhook(0,"novo_lead");leadEnviado=true;} i=0;render(); };
 }
 
 function renderFinal(){
