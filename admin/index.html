@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel · Escola do Dólar — Acelerador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;--ink:#1a1620;--muted:#6a6470;--line:#e9e7ea;
+    --gold:#b8860b;--gold-deep:#8a6a2c;--gold-soft:#faf4e4;--gold-line:#ecdcaf;
+    --grad:linear-gradient(135deg,#8a6a2c,#caa64e 45%,#a6791f);
+    --green:#2e7d32;--green-soft:#e8f3e9;
+    --serif:"DM Serif Display",Georgia,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:#fbfaf8;color:var(--ink);
+    -webkit-font-smoothing:antialiased;min-height:100dvh}
+  .b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ital{font-style:italic}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 60px}
+
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font:600 12px Inter;letter-spacing:3px;
+    text-transform:uppercase;color:var(--gold-deep);margin-bottom:10px}
+  .eyebrow::before{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
+  h1{font:400 clamp(28px,4.5vw,38px)/1.1 var(--serif)}
+  .sync{font:500 12.5px Inter;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .sync .dotp{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  .sync.err .dotp{background:#c0392b;animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .refreshbtn{background:none;border:1.5px solid var(--line);border-radius:20px;padding:7px 16px;
+    font:600 12.5px Inter;color:var(--muted);cursor:pointer;transition:.16s}
+  .refreshbtn:hover{border-color:var(--gold);color:var(--gold-deep)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:26px}
+  .card{border:1.5px solid var(--line);border-radius:18px;background:#fff;padding:20px 22px;cursor:pointer;
+    transition:.18s;text-align:left}
+  .card:hover{border-color:var(--gold-line)}
+  .card.on{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 10px 26px -18px rgba(184,134,11,.6)}
+  .card h3{font:400 20px var(--serif);margin-bottom:2px}
+  .card .fasetag{font:600 10.5px Inter;letter-spacing:2px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:10px}
+  .card .total{font:400 40px/1 var(--serif);margin:8px 0 12px}
+  .card .total small{font:500 13px Inter;color:var(--muted);letter-spacing:.3px}
+  .brk{display:flex;flex-wrap:wrap;gap:6px}
+  .brk span{font:600 11.5px Inter;padding:4px 10px;border-radius:12px;letter-spacing:.2px}
+  .bk-novo{background:#f0eef2;color:#5b5563}
+  .bk-and{background:var(--gold-soft);color:var(--gold-deep);border:1px solid var(--gold-line)}
+  .card.on .bk-and{background:#fff}
+  .bk-done{background:var(--green-soft);color:var(--green)}
+
+  .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .search{flex:1;min-width:240px;position:relative}
+  .search input{width:100%;border:1.5px solid var(--line);border-radius:14px;background:#fff;
+    padding:13px 16px 13px 42px;font:500 15px Inter;color:var(--ink);outline:none;transition:.18s}
+  .search input::placeholder{color:#b6bcc6}
+  .search input:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
+  .search::before{content:"⌕";position:absolute;left:15px;top:50%;transform:translateY(-54%);font-size:20px;color:#b6bcc6}
+  .filterinfo{font:500 13px Inter;color:var(--muted)}
+  .filterinfo b{color:var(--gold-deep)}
+  .clearf{background:none;border:none;color:var(--gold-deep);font:600 13px Inter;cursor:pointer;text-decoration:underline}
+
+  .list{border:1.5px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}
+  .lrow{border-bottom:1px solid var(--line)}
+  .lrow:last-child{border-bottom:none}
+  .lhead,.lmain{display:grid;grid-template-columns:1.3fr 1.5fr .95fr 1.15fr .7fr;gap:14px;align-items:center;padding:14px 20px}
+  .lhead{font:600 11px Inter;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
+    border-bottom:1.5px solid var(--line);background:#fcfbf9}
+  .lmain{cursor:pointer;transition:.14s}
+  .lmain:hover{background:var(--gold-soft)}
+  .lrow.open .lmain{background:var(--gold-soft)}
+  .lnome{font:600 15px Inter;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lnome .anon{color:#b3b0ba;font-weight:500;font-style:italic}
+  .lcontato{font:500 13px Inter;color:var(--muted);line-height:1.45;overflow:hidden}
+  .lcontato div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lform{font:600 12.5px Inter;color:var(--gold-deep)}
+  .lform small{display:block;font:500 11px Inter;color:#b3b0ba;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+  .st{display:inline-flex;align-items:center;gap:7px;font:600 12px Inter;padding:5px 12px;border-radius:14px}
+  .st::before{content:"";width:7px;height:7px;border-radius:50%}
+  .st-novo{background:#f0eef2;color:#5b5563}.st-novo::before{background:#8f8a99}
+  .st-and{background:var(--gold-soft);color:var(--gold-deep);border:1px solid var(--gold-line)}.st-and::before{background:var(--gold)}
+  .st-done{background:var(--green-soft);color:var(--green)}.st-done::before{background:var(--green)}
+  .setapa{display:block;font:500 11.5px Inter;color:var(--muted);margin-top:5px}
+  .ltime{font:500 12.5px Inter;color:var(--muted);text-align:right}
+
+  .ldet{display:none;padding:6px 20px 20px;background:#fefdfb;border-top:1px dashed var(--gold-line)}
+  .lrow.open .ldet{display:block;animation:in .25s ease}
+  @keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .ldet h4{font:600 11px Inter;letter-spacing:2px;text-transform:uppercase;color:var(--gold-deep);margin:16px 0 10px}
+  .resp{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .rit{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 14px}
+  .rit b{display:block;font:600 10.5px Inter;letter-spacing:1.2px;text-transform:uppercase;color:#a09a8a;margin-bottom:4px}
+  .rit span{font:500 14px/1.45 Inter;color:var(--ink);word-break:break-word;white-space:pre-wrap}
+  .logoprev{max-width:180px;max-height:120px;object-fit:contain;border:1.5px solid var(--line);
+    border-radius:12px;background:#fff;padding:8px;display:block}
+  .lid{font:500 10.5px "SF Mono",Menlo,monospace;color:#c4c0cb;margin-top:14px;word-break:break-all}
+
+  .empty{padding:56px 20px;text-align:center}
+  .empty .big{font:400 24px var(--serif);margin-bottom:8px}
+  .empty p{font:500 14px Inter;color:var(--muted)}
+  .warn{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;padding:16px 20px;
+    font:500 14px/1.55 Inter;color:var(--gold-deep);margin-bottom:22px}
+  .warn code{font:600 12.5px "SF Mono",Menlo,monospace;background:#fff;padding:2px 7px;border-radius:6px}
+
+  @media (max-width:760px){
+    .lhead{display:none}
+    .lmain{grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px}
+    .lcontato{grid-column:1}
+    .lform{grid-column:1}
+    .lst{grid-column:1}
+    .ltime{grid-row:1;grid-column:2;text-align:right}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Acelerador · Área interna</div>
+      <h1>Painel de <span class="b ital">leads</span></h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="sync" id="sync"><span class="dotp"></span><span id="synctxt">carregando…</span></div>
+      <button class="refreshbtn" id="refresh">↻ Atualizar</button>
+    </div>
+  </header>
+
+  <div id="cfgwarn" class="warn" style="display:none">
+    ⚠️ Configure o Supabase: preencha <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> no topo do
+    <code>&lt;script&gt;</code> deste arquivo (<code>admin/index.html</code>).
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="toolbar">
+    <div class="search"><input id="q" type="search" placeholder="Buscar por nome, e-mail ou WhatsApp…" autocomplete="off"></div>
+    <div class="filterinfo" id="finfo"></div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+/* ===== SUPABASE (config única — preencher com as credenciais do projeto) ===== */
+const SUPABASE_URL="";      // ex: https://xxxx.supabase.co
+const SUPABASE_ANON_KEY=""; // chave anon public
+
+const REFRESH_MS=15000;
+
+const FORMS={
+  reconhecimento:{label:"Reconhecimento",fase:"Fase 1"},
+  briefing_logo:{label:"Sua Logo",fase:"Fase 2"},
+  como_vai_receber:{label:"Como vai receber",fase:"Fase 3"}
+};
+const ST={
+  novo_lead:{label:"Começou",cls:"novo"},
+  em_andamento:{label:"Preenchendo",cls:"and"},
+  concluido:{label:"Concluído",cls:"done"}
+};
+const RESP_LABELS={
+  categoria:"Nicho",nicho:"Nicho",motivo:"Motivo",motivo_outro:"Outro motivo",obs:"Observações",
+  experiencia:"Experiência",ja_vendeu:"Já vendeu online",disponibilidade:"Disponibilidade",
+  horas_por_semana:"Horas por semana",o_que_trava:"O que trava",duvida:"Dúvida",
+  tudo_tranquilo:"Tudo tranquilo",o_que_pesou:"O que pesou",nome_loja:"Nome da loja",
+  tem_logo:"Já tem logo",logo_arquivo:"Arquivo da logo",logo_mime:"Tipo do arquivo",
+  estilo:"Estilo",cor:"Cor principal",conta_mais:"Conta mais",sensacao:"Sensação"
+};
+
+let leads=[], filtroForm=null, busca="", aberto=new Set(), timer=null;
+
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function rel(iso){
+  if(!iso) return "—";
+  const d=new Date(iso), diff=(Date.now()-d.getTime())/1000;
+  if(diff<60) return "agora";
+  if(diff<3600) return Math.floor(diff/60)+" min";
+  if(diff<86400) return Math.floor(diff/3600)+" h";
+  if(diff<7*86400) return Math.floor(diff/86400)+" d";
+  return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
+}
+
+async function load(manual){
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
+    $("cfgwarn").style.display="block";
+    $("synctxt").textContent="sem conexão";$("sync").classList.add("err");
+    draw();return;
+  }
+  try{
+    if(manual) $("synctxt").textContent="atualizando…";
+    const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=*&order=atualizado_em.desc",{
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY}});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    leads=await r.json();
+    $("sync").classList.remove("err");
+    $("synctxt").textContent="atualizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  }catch(e){
+    $("sync").classList.add("err");
+    $("synctxt").textContent="erro ao carregar ("+e.message+")";
+  }
+  draw();
+}
+
+function grupos(){
+  const g={};
+  for(const k of Object.keys(FORMS)) g[k]={total:0,novo_lead:0,em_andamento:0,concluido:0};
+  for(const l of leads){
+    const f=l.formulario||"outro";
+    if(!g[f]) g[f]={total:0,novo_lead:0,em_andamento:0,concluido:0};
+    g[f].total++;
+    if(g[f][l.status]!==undefined) g[f][l.status]++;
+  }
+  return g;
+}
+
+function filtrados(){
+  const q=busca.trim().toLowerCase();
+  return leads.filter(l=>{
+    if(filtroForm&&(l.formulario||"outro")!==filtroForm) return false;
+    if(!q) return true;
+    return [l.nome,l.email,l.whatsapp].some(v=>(v||"").toLowerCase().includes(q));
+  });
+}
+
+function drawCards(){
+  const g=grupos();
+  const keys=[...Object.keys(FORMS),...Object.keys(g).filter(k=>!FORMS[k])];
+  $("cards").innerHTML=keys.map(k=>{
+    const info=FORMS[k]||{label:k,fase:"—"}, d=g[k]||{total:0,novo_lead:0,em_andamento:0,concluido:0};
+    return `<button class="card ${filtroForm===k?'on':''}" data-f="${esc(k)}">
+      <div class="fasetag">${esc(info.fase)}</div>
+      <h3>${esc(info.label)}</h3>
+      <div class="total">${d.total} <small>lead${d.total===1?"":"s"}</small></div>
+      <div class="brk">
+        <span class="bk-novo">${d.novo_lead} começou</span>
+        <span class="bk-and">${d.em_andamento} preenchendo</span>
+        <span class="bk-done">${d.concluido} concluído${d.concluido===1?"":"s"}</span>
+      </div>
+    </button>`;
+  }).join("");
+  $("cards").querySelectorAll(".card").forEach(c=>{
+    c.onclick=()=>{filtroForm=(filtroForm===c.dataset.f?null:c.dataset.f);draw();};
+  });
+}
+
+function respHTML(l){
+  const r=l.respostas||{};
+  let logo="";
+  if(r.logo_base64){
+    const src=String(r.logo_base64).startsWith("data:")?r.logo_base64:
+      "data:"+(r.logo_mime||"image/png")+";base64,"+r.logo_base64;
+    logo=`<div class="rit" style="grid-column:1/-1"><b>Logo enviada</b><img class="logoprev" src="${src.replace(/"/g,'&quot;')}" alt="logo"></div>`;
+  }
+  const itens=Object.entries(r)
+    .filter(([k,v])=>k!=="logo_base64"&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
+    .map(([k,v])=>{
+      let txt=Array.isArray(v)?v.join(", "):(typeof v==="boolean"?(v?"Sim":"Não"):String(v));
+      return `<div class="rit"><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b><span>${esc(txt)}</span></div>`;
+    }).join("");
+  if(!itens&&!logo) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
+  return `<div class="resp">${logo}${itens}</div>`;
+}
+
+function drawList(){
+  const fl=filtrados();
+  $("finfo").innerHTML=(filtroForm?`Filtrando: <b>${esc((FORMS[filtroForm]||{label:filtroForm}).label)}</b> · <button class="clearf" id="clearf">limpar</button> · `:"")
+    +fl.length+" de "+leads.length+" leads";
+  const cf=$("clearf"); if(cf) cf.onclick=()=>{filtroForm=null;draw();};
+
+  if(!fl.length){
+    $("list").innerHTML=`<div class="empty"><div class="big">Nenhum lead ${leads.length?"nesse filtro":"ainda"}.</div>
+      <p>${leads.length?"Ajusta a busca ou limpa o filtro.":"Assim que alguém começar a preencher um form, aparece aqui."}</p></div>`;
+    return;
+  }
+  $("list").innerHTML=`<div class="lhead"><span>Nome</span><span>Contato</span><span>Form</span><span>Onde está</span><span style="text-align:right">Atualizado</span></div>`
+    +fl.map(l=>{
+      const info=FORMS[l.formulario]||{label:l.formulario||"—",fase:l.fase||""};
+      const st=ST[l.status]||{label:l.status||"—",cls:"novo"};
+      const etapa=(l.status==="concluido")?"":`<span class="setapa">Etapa ${l.step??"—"}</span>`;
+      return `<div class="lrow ${aberto.has(l.id)?'open':''}" data-id="${esc(l.id)}">
+        <div class="lmain">
+          <div class="lnome">${l.nome?esc(l.nome):'<span class="anon">Sem nome</span>'}</div>
+          <div class="lcontato"><div>${esc(l.email||"—")}</div><div>${esc(l.whatsapp||"—")}</div></div>
+          <div class="lform">${esc(info.label)}<small>${esc(info.fase||l.fase||"")}</small></div>
+          <div class="lst"><span class="st st-${st.cls}">${esc(st.label)}</span>${etapa}</div>
+          <div class="ltime">${rel(l.atualizado_em)}</div>
+        </div>
+        <div class="ldet">
+          <h4>Respostas</h4>
+          ${respHTML(l)}
+          <div class="lid">id: ${esc(l.id)} · criado: ${l.criado_em?new Date(l.criado_em).toLocaleString("pt-BR"):"—"}</div>
+        </div>
+      </div>`;
+    }).join("");
+  $("list").querySelectorAll(".lrow .lmain").forEach(m=>{
+    m.onclick=()=>{
+      const id=m.parentElement.dataset.id;
+      aberto.has(id)?aberto.delete(id):aberto.add(id);
+      m.parentElement.classList.toggle("open");
+    };
+  });
+}
+
+function draw(){drawCards();drawList();}
+
+$("q").oninput=e=>{busca=e.target.value;drawList();};
+$("refresh").onclick=()=>load(true);
+
+load();
+timer=setInterval(load,REFRESH_MS);
+</script>
+</body>
+</html>

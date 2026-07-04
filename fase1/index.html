@@ -125,6 +125,10 @@
 const FASE="fase1", FORMULARIO="reconhecimento";
 const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
 
+/* ===== SUPABASE (config única — preencher com as credenciais do projeto) ===== */
+const SUPABASE_URL="";      // ex: https://xxxx.supabase.co
+const SUPABASE_ANON_KEY=""; // chave anon public
+
 /* Identidade vem da URL: ?nome=Maria&email=maria@x.com&whatsapp=27998233325 */
 const Q=new URLSearchParams(location.search);
 function qp(){for(const k of arguments){const v=Q.get(k);if(v)return v;}return "";}
@@ -194,6 +198,21 @@ function sendWebhook(step,status){
     const opt={method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=UTF-8"},body};
     if(body.length<60000) opt.keepalive=true;
     fetch(WEBHOOK,opt);
+  }catch(e){}
+  sendSupabase(step,status);
+}
+function sendSupabase(step,status){
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
+  try{
+    const p=buildPayload(step,status);
+    const row={id:p.id,fase:p.fase,formulario:p.formulario,status:p.status,step:p.step,
+      nome:p.nome,email:p.email,whatsapp:p.whatsapp,respostas:p.respostas,atualizado_em:p.atualizado_em};
+    const body=JSON.stringify(row);
+    const opt={method:"POST",headers:{
+      apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
+      "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body};
+    if(body.length<60000) opt.keepalive=true;
+    fetch(SUPABASE_URL+"/rest/v1/leads?on_conflict=id",opt);
   }catch(e){}
 }
 
