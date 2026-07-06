@@ -162,14 +162,15 @@ const STEPS=[
   {key:"tem_logo",n:2,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span> da sua loja?',sub:"Vai mandar a sua ou quer que a gente crie?",
     options:[{t:SIM,d:"Tenho no celular ou computador, é só subir"},{t:NAO,d:"Respondo umas perguntas rápidas e a equipe faz 3 opções"}]},
   {key:"logo",n:3,type:"file",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">subir a sua</span>.',sub:"Toque pra escolher o arquivo da sua logo (PNG ou JPG, de preferência com fundo transparente). Máx 4 MB.",cond:a=>a.tem_logo===SIM,optional:true},
-  {key:"estilo",n:4,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 3 de 6",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais combina com você.",cond:a=>a.tem_logo===NAO,
+  {key:"estilo",n:4,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 3 de 7",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais combina com você.",cond:a=>a.tem_logo===NAO,
     options:[{t:"Elegante",d:"Sofisticado, que não sai de moda"},{t:"Moderno",d:"Clean, com ar tech"},{t:"Natural",d:"Orgânico, terroso"},{t:"Jovem",d:"Colorido, animado"},{t:"Profissional",d:"Confiável, sério"},{t:"Minimalista",d:"Direto ao ponto"}]},
-  {key:"cor",n:5,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 4 de 6",title:'Qual <span class="b ital">dupla de cores</span> você quer?',sub:"Escolha a combinação que mais combina com sua loja.",cond:a=>a.tem_logo===NAO,
+  {key:"cor_loja",n:5,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 4 de 7",title:'Quais as <span class="b ital">cores da sua loja</span>?',sub:"Escolha a dupla que mais combina com sua loja.",cond:a=>a.tem_logo===NAO,
     options:["🔵🟡 Azul e amarelo","🟣🟢 Roxo e verde","🟠🟣 Laranja e roxo","🔴🟡 Vermelho e amarelo"]},
-  {key:"conta_mais",n:6,type:"textarea",eyebrow:"Como você quer sua logo? · Pergunta 5 de 6",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre você?',sub:"Coisas que fazem sentido pra você: uma referência, uma frase, um sentimento. Pode pular.",placeholder:"Ex: quero algo que passe confiança e leveza.",optional:true,cond:a=>a.tem_logo===NAO},
-  {key:"sensacao",n:7,type:"multi",pills:true,max:2,eyebrow:"Como você quer sua logo? · Pergunta 6 de 6",title:'Qual <span class="b ital">sensação</span> sua marca deve passar?',sub:"Escolha até 2.",cond:a=>a.tem_logo===NAO,
+  {key:"cor_logo",n:6,type:"text",eyebrow:"Como você quer sua logo? · Pergunta 5 de 7",title:'E qual <span class="b ital">cor você quer na logo</span>?',sub:"Aqui é livre: pode ser uma cor, duas, ou uma vibe.",placeholder:"Ex: dourado com preto",cond:a=>a.tem_logo===NAO},
+  {key:"conta_mais",n:7,type:"textarea",eyebrow:"Como você quer sua logo? · Pergunta 6 de 7",title:'Quer contar <span class="b ital">mais alguma coisa</span> sobre você?',sub:"Coisas que fazem sentido pra você: uma referência, uma frase, um sentimento. Pode pular.",placeholder:"Ex: quero algo que passe confiança e leveza.",optional:true,cond:a=>a.tem_logo===NAO},
+  {key:"sensacao",n:8,type:"multi",pills:true,max:2,eyebrow:"Como você quer sua logo? · Pergunta 7 de 7",title:'Qual <span class="b ital">sensação</span> sua marca deve passar?',sub:"Escolha até 2.",cond:a=>a.tem_logo===NAO,
     options:["Confiança","Acolhimento","Sofisticação","Energia","Autoridade","Exclusividade","Proximidade","Inovação","Resultado"]},
-  {key:"ultima_parte",n:8,type:"info",eyebrow:"Última parte",nextLabel:"Continuar",title:'Quase lá, {n}. <span class="b ital">Última parte.</span>',sub:"Tá tudo pronto do seu lado. Falta só a gente finalizar a sua loja e te chamar. Toca pra confirmar."}
+  {key:"ultima_parte",n:9,type:"info",eyebrow:"Última parte",nextLabel:"Continuar",title:'Quase lá, {n}. <span class="b ital">Última parte.</span>',sub:"Tá tudo pronto do seu lado. Falta só a gente finalizar a sua loja e te chamar. Toca pra confirmar."}
 ];
 
 const app=document.getElementById("app");
@@ -248,7 +249,9 @@ function buildPayload(step,status){
       lead_id_origem:ans._origem||null,
       nome_loja:ans.nome_loja||null, tem_logo:ans.tem_logo||null,
       logo_arquivo:ans.logo_nome||null, logo_mime:ans.logo_mime||null, logo_base64:ans.logo_b64||null,
-      estilo:ans.estilo||null, cor:ans.cor||null, conta_mais:ans.conta_mais||null, sensacao:ans.sensacao||null
+      estilo:ans.estilo||null, cor_loja:ans.cor_loja||null, cor_logo:ans.cor_logo||null,
+      conta_mais:ans.conta_mais||null, sensacao:ans.sensacao||null,
+      logo_prompt:ans.logo_prompt||null
     },
     atualizado_em:new Date().toISOString()
   };
@@ -397,11 +400,25 @@ function wire(s){
   next.onclick=go; upd();
 }
 
+/* Prompt de geração da logo (IA) — montado no fim, salvo no banco, não aparece pro lead */
+function montarPromptLogo(){
+  if(ans.tem_logo!==NAO) return null;
+  const loja=(ans.nome_loja||"").trim()||"a loja";
+  const p=[`Crie uma logo profissional para a loja online "${loja}".`];
+  if(ans.estilo) p.push(`Estilo visual: ${ans.estilo.toLowerCase()}.`);
+  if(ans.cor_logo) p.push(`Cores da logo: ${ans.cor_logo.trim()}.`);
+  if(ans.cor_loja) p.push(`Paleta da loja como contexto: ${ans.cor_loja.replace(/^[^\wÀ-ÿ]+/,"").toLowerCase()}.`);
+  if(Array.isArray(ans.sensacao)&&ans.sensacao.length) p.push(`A marca deve transmitir ${ans.sensacao.join(" e ").toLowerCase()}.`);
+  if((ans.conta_mais||"").trim()) p.push(`Observações do cliente: ${ans.conta_mais.trim()}`);
+  p.push(`Requisitos: o nome "${loja}" bem legível como elemento principal, design limpo e memorável, fundo transparente, sem slogan e sem textos extras, adequado para um e-commerce premium de saúde e bem-estar.`);
+  return p.join(" ");
+}
+
 function go(){
   const list=seq(); const s=list[i]; if(!valid(s)) return;
   i++;
   const list2=seq();
-  if(i>=list2.length) sendWebhook(s.n,"concluido");
+  if(i>=list2.length){ ans.logo_prompt=montarPromptLogo(); sendWebhook(s.n,"concluido"); }
   else sendWebhook(s.n,"em_andamento");
   render();
 }

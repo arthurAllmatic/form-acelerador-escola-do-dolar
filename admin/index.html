@@ -97,6 +97,10 @@
   .rit span{font:500 14px/1.45 Inter;color:var(--ink);word-break:break-word;white-space:pre-wrap}
   .logoprev{max-width:180px;max-height:120px;object-fit:contain;border:1.5px solid var(--line);
     border-radius:12px;background:#fff;padding:8px;display:block}
+  .verlogo{display:inline-block;margin-top:10px;font:700 13px Inter;color:var(--gold-deep);
+    border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:20px;
+    padding:8px 16px;text-decoration:none;transition:.16s}
+  .verlogo:hover{border-color:var(--gold)}
   .lid{font:500 10.5px "SF Mono",Menlo,monospace;color:#c4c0cb;margin-top:14px;word-break:break-all}
 
   .empty{padding:56px 20px;text-align:center}
@@ -167,7 +171,9 @@ const RESP_LABELS={
   horas_por_semana:"Horas por semana",o_que_trava:"O que trava",duvida:"Dúvida",
   tudo_tranquilo:"Tudo tranquilo",o_que_pesou:"O que pesou",nome_loja:"Nome da loja",
   tem_logo:"Já tem logo",logo_arquivo:"Arquivo da logo",logo_mime:"Tipo do arquivo",
-  estilo:"Estilo",cor:"Cor principal",conta_mais:"Conta mais",sensacao:"Sensação"
+  estilo:"Estilo",cor:"Cor principal",cor_loja:"Cores da loja",cor_logo:"Cor da logo",
+  conta_mais:"Conta mais",sensacao:"Sensação",lead_id_origem:"Lead de origem",
+  logo_prompt:"Prompt da logo (IA)"
 };
 
 let leads=[], filtroForm=null, busca="", aberto=new Set(), timer=null;
@@ -250,20 +256,28 @@ function drawCards(){
 
 function respHTML(l){
   const r=l.respostas||{};
-  let logo="";
+  let logo="", gerada="";
   if(r.logo_base64){
     const src=String(r.logo_base64).startsWith("data:")?r.logo_base64:
       "data:"+(r.logo_mime||"image/png")+";base64,"+r.logo_base64;
     logo=`<div class="rit" style="grid-column:1/-1"><b>Logo enviada</b><img class="logoprev" src="${src.replace(/"/g,'&quot;')}" alt="logo"></div>`;
   }
+  if(r.logo_gerada_url||r.logo_gerada_base64){
+    const src=r.logo_gerada_url||(String(r.logo_gerada_base64).startsWith("data:")?r.logo_gerada_base64:
+      "data:image/png;base64,"+r.logo_gerada_base64);
+    gerada=`<div class="rit" style="grid-column:1/-1"><b>Logo gerada (IA)</b>
+      <img class="logoprev" src="${String(src).replace(/"/g,'&quot;')}" alt="logo gerada">
+      ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
+  }
+  const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url"];
   const itens=Object.entries(r)
-    .filter(([k,v])=>k!=="logo_base64"&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
+    .filter(([k,v])=>!OCULTOS.includes(k)&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
     .map(([k,v])=>{
       let txt=Array.isArray(v)?v.join(", "):(typeof v==="boolean"?(v?"Sim":"Não"):String(v));
-      return `<div class="rit"><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b><span>${esc(txt)}</span></div>`;
+      return `<div class="rit"${k==="logo_prompt"?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b><span>${esc(txt)}</span></div>`;
     }).join("");
-  if(!itens&&!logo) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
-  return `<div class="resp">${logo}${itens}</div>`;
+  if(!itens&&!logo&&!gerada) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
+  return `<div class="resp">${gerada}${logo}${itens}</div>`;
 }
 
 function drawList(){
