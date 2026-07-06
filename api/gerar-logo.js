@@ -16,12 +16,12 @@ module.exports = async (req, res) => {
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ error: "OPENAI_API_KEY não configurada no Vercel" });
     }
-    const { lead_id, respostas = {}, email = "", lead_id_origem = null } = req.body || {};
+    const { lead_id, respostas = {}, email = "", lead_id_origem = null, force = false } = req.body || {};
     if (!lead_id) return res.status(400).json({ error: "lead_id obrigatório" });
 
-    // Se já tem logo gerada, não gera de novo
+    // Se já tem logo gerada, não gera de novo (a não ser com force:true)
     const atual = await lerLead(lead_id);
-    if (atual && atual.respostas && atual.respostas.logo_gerada_url) {
+    if (!force && atual && atual.respostas && atual.respostas.logo_gerada_url) {
       return res.status(200).json({ ok: true, ja_existia: true, url: atual.respostas.logo_gerada_url });
     }
 
@@ -90,17 +90,16 @@ function montarPrompt(r, nicho) {
   if (nicho) p[0] += `, do nicho de ${nicho.toLowerCase()}`;
   p[0] += ".";
   if (r.estilo) p.push(`Estilo visual: ${String(r.estilo).toLowerCase()}.`);
-  if (r.cor_logo) p.push(`Cores da logo: ${String(r.cor_logo).trim()}.`);
-  if (r.cor_loja) p.push(`Paleta da loja como contexto: ${String(r.cor_loja).replace(/^[^\wÀ-ÿ]+/u, "").toLowerCase()}.`);
+  if (r.cor_logo) p.push(`Cores da logo: ${String(r.cor_logo).trim()} — use SOMENTE essas cores nos elementos da logo.`);
   if (Array.isArray(r.sensacao) && r.sensacao.length) p.push(`A marca deve transmitir ${r.sensacao.join(" e ").toLowerCase()}.`);
   if ((r.conta_mais || "").trim()) p.push(`Observações do cliente: ${String(r.conta_mais).trim()}.`);
-  p.push(`Requisitos: o nome "${loja}" bem legível como elemento principal, design limpo e memorável, fundo transparente, sem slogan e sem textos extras, adequado para um e-commerce premium de saúde e bem-estar voltado ao público europeu.`);
+  p.push(`Requisitos: o nome "${loja}" bem legível como elemento principal com um símbolo simples acima ou ao lado, estilo vetorial flat com traços nítidos e bem definidos, alto contraste, design limpo e memorável, fundo 100% transparente (sem cor de fundo, sem gradiente de fundo), sem slogan e sem textos extras, adequado para um e-commerce premium de saúde e bem-estar voltado ao público europeu.`);
   return p.join(" ");
 }
 
 async function gerarImagem(prompt, model) {
   const body = { model, prompt, n: 1, size: "1024x1024" };
-  if (model === "gpt-image-1") body.background = "transparent";
+  if (model === "gpt-image-1") { body.background = "transparent"; body.quality = "high"; }
   else body.response_format = "b64_json";
   const r = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",

@@ -292,11 +292,12 @@ function respHTML(l){
     logo=`<div class="rit" style="grid-column:1/-1"><b>Logo enviada</b><img class="logoprev" src="${src.replace(/"/g,'&quot;')}" alt="logo"></div>`;
   }
   if(r.logo_gerada_url||r.logo_gerada_base64){
-    const src=r.logo_gerada_url||(String(r.logo_gerada_base64).startsWith("data:")?r.logo_gerada_base64:
-      "data:image/png;base64,"+r.logo_gerada_base64);
+    const buster=r.logo_gerada_em?"?v="+encodeURIComponent(r.logo_gerada_em):"";
+    const src=(r.logo_gerada_url?r.logo_gerada_url+buster:(String(r.logo_gerada_base64).startsWith("data:")?r.logo_gerada_base64:
+      "data:image/png;base64,"+r.logo_gerada_base64));
     gerada=`<div class="rit" style="grid-column:1/-1"><b>Logo gerada (IA)</b>
       <img class="logoprev" src="${String(src).replace(/"/g,'&quot;')}" alt="logo gerada">
-      ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
+      ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url+buster)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
   }
   const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url"];
   const itens=Object.entries(r)
