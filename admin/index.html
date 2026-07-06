@@ -162,7 +162,8 @@ const REFRESH_MS=15000;
 const FORMS={
   reconhecimento:{label:"Reconhecimento",fase:"Fase 1"},
   briefing_logo:{label:"Sua Logo",fase:"Fase 2"},
-  como_vai_receber:{label:"Como vai receber",fase:"Fase 3"}
+  como_vai_receber:{label:"Como vai receber",fase:"Fase 3"},
+  instalar_tema:{label:"Instalar Tema",fase:"Sobe Tema"}
 };
 const ST={
   novo_lead:{label:"Começou",cls:"novo"},
@@ -177,7 +178,8 @@ const RESP_LABELS={
   tem_logo:"Já tem logo",logo_arquivo:"Arquivo da logo",logo_mime:"Tipo do arquivo",
   estilo:"Estilo",cor:"Cor principal",cor_loja:"Cores da loja",cor_logo:"Cor da logo",
   conta_mais:"Conta mais",sensacao:"Sensação",lead_id_origem:"Lead de origem",
-  logo_prompt:"Prompt da logo (IA)"
+  logo_prompt:"Prompt da logo (IA)",
+  loja_shopify:"Loja Shopify",tema_instalado:"Tema instalado",ultimo_erro:"Último erro"
 };
 
 let leads=[], filtroForm=null, busca="", aberto=new Set(), timer=null;
