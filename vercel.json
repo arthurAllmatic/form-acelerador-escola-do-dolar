@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/gerar-logo.js": {
+      "maxDuration": 60
+    }
+  }
+}

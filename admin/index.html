@@ -67,7 +67,7 @@
   .list{border:1.5px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}
   .lrow{border-bottom:1px solid var(--line)}
   .lrow:last-child{border-bottom:none}
-  .lhead,.lmain{display:grid;grid-template-columns:1.3fr 1.5fr .95fr 1.15fr .7fr;gap:14px;align-items:center;padding:14px 20px}
+  .lhead,.lmain{display:grid;grid-template-columns:1.2fr 1.4fr 1.7fr .6fr;gap:14px;align-items:center;padding:14px 20px}
   .lhead{font:600 11px Inter;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
     border-bottom:1.5px solid var(--line);background:#fcfbf9}
   .lmain{cursor:pointer;transition:.14s}
@@ -86,6 +86,11 @@
   .st-done{background:var(--green-soft);color:var(--green)}.st-done::before{background:var(--green)}
   .setapa{display:block;font:500 11.5px Inter;color:var(--muted);margin-top:5px}
   .ltime{font:500 12.5px Inter;color:var(--muted);text-align:right}
+  .etapas{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+  .etsec{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff}
+  .ethead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .ethead b{font:600 14px Inter;color:var(--ink)}
+  .ettime{font:500 12px Inter;color:var(--muted);margin-left:auto}
 
   .ldet{display:none;padding:6px 20px 20px;background:#fefdfb;border-top:1px dashed var(--gold-line)}
   .lrow.open .ldet{display:block;animation:in .25s ease}
@@ -114,8 +119,7 @@
     .lhead{display:none}
     .lmain{grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px}
     .lcontato{grid-column:1}
-    .lform{grid-column:1}
-    .lst{grid-column:1}
+    .etapas{grid-column:1}
     .ltime{grid-row:1;grid-column:2;text-align:right}
   }
 </style>
@@ -224,12 +228,37 @@ function grupos(){
   return g;
 }
 
+const ORDEM_FORMS={reconhecimento:1,briefing_logo:2,como_vai_receber:3};
+
+/* Agrupa por e-mail: uma pessoa = uma linha; cada etapa vira histórico dentro dela.
+   Se houver mais de um registro da mesma etapa pro mesmo e-mail, mostra o mais recente. */
+function agrupar(list){
+  const map=new Map();
+  for(const l of list){
+    const key=(l.email||"").trim().toLowerCase()||("__sem_email__"+l.id);
+    if(!map.has(key)) map.set(key,{key,nome:"",email:"",whatsapp:"",porForm:{},atualizado_em:l.atualizado_em});
+    const g=map.get(key);
+    if(!g.nome&&l.nome) g.nome=l.nome;
+    if(!g.email&&l.email) g.email=l.email;
+    if(!g.whatsapp&&l.whatsapp) g.whatsapp=l.whatsapp;
+    if(new Date(l.atualizado_em||0)>new Date(g.atualizado_em||0)) g.atualizado_em=l.atualizado_em;
+    const f=l.formulario||"outro";
+    const atual=g.porForm[f];
+    if(!atual||new Date(l.atualizado_em||0)>new Date(atual.atualizado_em||0)) g.porForm[f]=l;
+  }
+  return [...map.values()].sort((a,b)=>new Date(b.atualizado_em||0)-new Date(a.atualizado_em||0));
+}
+
+function formsDoGrupo(g){
+  return Object.keys(g.porForm).sort((a,b)=>(ORDEM_FORMS[a]||9)-(ORDEM_FORMS[b]||9));
+}
+
 function filtrados(){
   const q=busca.trim().toLowerCase();
-  return leads.filter(l=>{
-    if(filtroForm&&(l.formulario||"outro")!==filtroForm) return false;
+  return agrupar(leads).filter(g=>{
+    if(filtroForm&&!g.porForm[filtroForm]) return false;
     if(!q) return true;
-    return [l.nome,l.email,l.whatsapp].some(v=>(v||"").toLowerCase().includes(q));
+    return [g.nome,g.email,g.whatsapp].some(v=>(v||"").toLowerCase().includes(q));
   });
 }
 
@@ -282,8 +311,9 @@ function respHTML(l){
 
 function drawList(){
   const fl=filtrados();
+  const total=agrupar(leads).length;
   $("finfo").innerHTML=(filtroForm?`Filtrando: <b>${esc((FORMS[filtroForm]||{label:filtroForm}).label)}</b> · <button class="clearf" id="clearf">limpar</button> · `:"")
-    +fl.length+" de "+leads.length+" leads";
+    +fl.length+" de "+total+" pessoas";
   const cf=$("clearf"); if(cf) cf.onclick=()=>{filtroForm=null;draw();};
 
   if(!fl.length){
@@ -291,23 +321,35 @@ function drawList(){
       <p>${leads.length?"Ajusta a busca ou limpa o filtro.":"Assim que alguém começar a preencher um form, aparece aqui."}</p></div>`;
     return;
   }
-  $("list").innerHTML=`<div class="lhead"><span>Nome</span><span>Contato</span><span>Form</span><span>Onde está</span><span style="text-align:right">Atualizado</span></div>`
-    +fl.map(l=>{
-      const info=FORMS[l.formulario]||{label:l.formulario||"—",fase:l.fase||""};
-      const st=ST[l.status]||{label:l.status||"—",cls:"novo"};
-      const etapa=(l.status==="concluido")?"":`<span class="setapa">Etapa ${l.step??"—"}</span>`;
-      return `<div class="lrow ${aberto.has(l.id)?'open':''}" data-id="${esc(l.id)}">
-        <div class="lmain">
-          <div class="lnome">${l.nome?esc(l.nome):'<span class="anon">Sem nome</span>'}</div>
-          <div class="lcontato"><div>${esc(l.email||"—")}</div><div>${esc(l.whatsapp||"—")}</div></div>
-          <div class="lform">${esc(info.label)}<small>${esc(info.fase||l.fase||"")}</small></div>
-          <div class="lst"><span class="st st-${st.cls}">${esc(st.label)}</span>${etapa}</div>
-          <div class="ltime">${rel(l.atualizado_em)}</div>
-        </div>
-        <div class="ldet">
-          <h4>Respostas</h4>
+  $("list").innerHTML=`<div class="lhead"><span>Nome</span><span>Contato</span><span>Etapas</span><span style="text-align:right">Atualizado</span></div>`
+    +fl.map(g=>{
+      const chips=formsDoGrupo(g).map(f=>{
+        const l=g.porForm[f], info=FORMS[f]||{label:f,fase:l.fase||""};
+        const st=ST[l.status]||{label:l.status||"—",cls:"novo"};
+        const etapa=(l.status==="concluido")?"":` · etapa ${l.step??"—"}`;
+        return `<span class="st st-${st.cls}">${esc(info.fase||info.label)} · ${esc(st.label)}${esc(etapa)}</span>`;
+      }).join("");
+      const secoes=formsDoGrupo(g).map(f=>{
+        const l=g.porForm[f], info=FORMS[f]||{label:f,fase:l.fase||""};
+        const st=ST[l.status]||{label:l.status||"—",cls:"novo"};
+        return `<div class="etsec">
+          <div class="ethead"><b>${esc(info.fase?info.fase+" · ":"")}${esc(info.label)}</b>
+            <span class="st st-${st.cls}">${esc(st.label)}${l.status!=="concluido"?` · etapa ${l.step??"—"}`:""}</span>
+            <span class="ettime">${rel(l.atualizado_em)}</span></div>
           ${respHTML(l)}
           <div class="lid">id: ${esc(l.id)} · criado: ${l.criado_em?new Date(l.criado_em).toLocaleString("pt-BR"):"—"}</div>
+        </div>`;
+      }).join("");
+      return `<div class="lrow ${aberto.has(g.key)?'open':''}" data-id="${esc(g.key)}">
+        <div class="lmain">
+          <div class="lnome">${g.nome?esc(g.nome):'<span class="anon">Sem nome</span>'}</div>
+          <div class="lcontato"><div>${esc(g.email||"—")}</div><div>${esc(g.whatsapp||"—")}</div></div>
+          <div class="etapas">${chips}</div>
+          <div class="ltime">${rel(g.atualizado_em)}</div>
+        </div>
+        <div class="ldet">
+          <h4>Histórico da pessoa</h4>
+          ${secoes}
         </div>
       </div>`;
     }).join("");

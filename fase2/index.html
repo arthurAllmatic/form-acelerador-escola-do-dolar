@@ -414,11 +414,30 @@ function montarPromptLogo(){
   return p.join(" ");
 }
 
+/* Dispara a geração da logo no servidor (o lead não vê nada) */
+function solicitarLogoIA(){
+  try{
+    fetch("/api/gerar-logo",{method:"POST",keepalive:true,
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        lead_id:ans._id,
+        email:(ans.email||"").trim(),
+        lead_id_origem:ans._origem||null,
+        respostas:{nome_loja:ans.nome_loja||null,estilo:ans.estilo||null,cor_loja:ans.cor_loja||null,
+          cor_logo:ans.cor_logo||null,conta_mais:ans.conta_mais||null,sensacao:ans.sensacao||null}
+      })});
+  }catch(e){}
+}
+
 function go(){
   const list=seq(); const s=list[i]; if(!valid(s)) return;
   i++;
   const list2=seq();
-  if(i>=list2.length){ ans.logo_prompt=montarPromptLogo(); sendWebhook(s.n,"concluido"); }
+  if(i>=list2.length){
+    ans.logo_prompt=montarPromptLogo();
+    sendWebhook(s.n,"concluido");
+    if(ans.logo_prompt) solicitarLogoIA();
+  }
   else sendWebhook(s.n,"em_andamento");
   render();
 }
