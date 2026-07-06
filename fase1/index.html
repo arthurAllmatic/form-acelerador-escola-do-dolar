@@ -51,6 +51,13 @@
     padding:17px 18px;font:500 17px Inter;color:var(--ink);outline:none;transition:.18s;resize:none;min-height:120px;line-height:1.45}
   textarea.fld::placeholder{color:#b6bcc6}
   textarea.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
+  input.fld{width:100%;border:1.5px solid var(--line);border-radius:14px;background:#fff;
+    padding:17px 18px;font:500 17px Inter;color:var(--ink);outline:none;transition:.18s}
+  input.fld::placeholder{color:#b6bcc6}
+  input.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
+  .gateerr{margin-top:14px;border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;
+    padding:14px 18px;font:500 14.5px/1.55 Inter;color:var(--gold-deep);animation:in .3s ease}
+  .gateerr a{display:inline-block;margin-top:8px;font:700 14px Inter;color:var(--gold-deep)}
 
   .opts{display:flex;flex-direction:column;gap:11px}
   .opt{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
@@ -177,15 +184,72 @@ const ans={
   whatsapp:qp("whatsapp","telefone","phone","wpp","celular","tel","fone"),
   ddi:qp("ddi")||"+55"
 };
-let i=-1, leadEnviado=false;
+let i=-1, leadEnviado=false, identified=false, checking=false, gateMsg="";
 
 function seq(){ return STEPS.filter(s=>!s.cond||s.cond(ans)); }
+
+/* ===== Identificação por e-mail (base do Supabase) ===== */
+const FORM_CADASTRO="https://lojaexclusiva.escoladodolar.com/";
+const GATE_NOTFOUND=`<div class="gateerr">A gente não achou esse e-mail na nossa base. Confere se digitou certinho — ou, se ainda não fez a primeira etapa, começa por ela:<br><a href="${FORM_CADASTRO}">Fazer meu cadastro &rarr;</a></div>`;
+const GATE_OFFLINE=`<div class="gateerr">Não conseguimos verificar agora. Espera um instante e tenta de novo.</div>`;
+
+function emailOk(v){return /.+@.+\..+/.test((v||"").trim())}
+
+async function lookupEmail(email){
+  const q=encodeURIComponent((email||"").trim());
+  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=id,nome,email,whatsapp,formulario&email=ilike."+q+"&order=atualizado_em.desc&limit=10",
+    {headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY}});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const rows=await r.json();
+  return rows.find(x=>x.formulario==="reconhecimento")||rows[0]||null;
+}
+
+function aplicarIdentidade(row){
+  identified=true;
+  ans._origem=row.id;
+  ans.email=row.email||ans.email;
+  if(row.nome) ans.nome=row.nome;
+  if(row.whatsapp) ans.whatsapp=row.whatsapp;
+}
+
+function renderGate(){
+  const hdr=document.getElementById('brand'); if(hdr) hdr.style.display='flex';
+  app.innerHTML=`
+    <div class="nav"><button class="back" style="visibility:hidden">&larr;</button><div class="dots"></div><div class="count"></div></div>
+    <div class="screen">
+      <div class="eyebrow">Identificação</div>
+      <h1 class="q">Pra continuar, qual seu <span class="b ital">e-mail</span>?</h1>
+      <div class="sub">É o mesmo e-mail que você cadastrou na primeira etapa (o da compra na Hotmart).</div>
+      <div class="body">
+        <input class="fld" id="gmail" type="email" placeholder="voce@email.com" value="${(ans.email||"").replace(/"/g,'&quot;')}" autocomplete="email">
+        <div id="gmsg">${gateMsg}</div>
+      </div>
+      <div class="foot"><button class="next" id="gnext">Continuar</button></div>
+    </div>`;
+  gateMsg="";
+  const f=document.getElementById("gmail"), btn=document.getElementById("gnext"), box=document.getElementById("gmsg");
+  const upd=()=>{btn.disabled=checking||!emailOk(f.value)};
+  f.oninput=upd;
+  f.onkeydown=e=>{if(e.key==="Enter"&&!btn.disabled)btn.click()};
+  btn.onclick=async()=>{
+    if(checking) return;
+    checking=true; btn.textContent="Verificando…"; upd();
+    try{
+      const row=await lookupEmail(f.value);
+      if(row){ aplicarIdentidade(row); checking=false; render(); return; }
+      box.innerHTML=GATE_NOTFOUND;
+    }catch(e){ box.innerHTML=GATE_OFFLINE; }
+    checking=false; btn.textContent="Continuar"; upd();
+  };
+  f.focus(); upd();
+}
 
 function buildPayload(step,status){
   return {
     id:ans._id, fase:FASE, formulario:FORMULARIO, step:step, status:status,
     nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
     respostas:{
+      lead_id_origem:ans._origem||null,
       ja_vendeu:ans.experiencia||null, motivo:ans.motivo||null,
       o_que_trava:ans.trava||null, nicho:ans.categoria||null, horas_por_semana:ans.tempo||null
     },
@@ -230,6 +294,7 @@ function valid(step){
 }
 
 function render(){
+  if(!identified){renderGate();return}
   const list=seq();
   const hdr=document.getElementById('brand'); if(hdr) hdr.style.display=(i===-1?'flex':'none');
   if(i===-1){renderWelcome();return}
@@ -352,7 +417,16 @@ function renderFinal(){
     </div>`;
 }
 
-render();
+(async function init(){
+  if(ans.email&&emailOk(ans.email)){
+    try{
+      const row=await lookupEmail(ans.email);
+      if(row) aplicarIdentidade(row);
+      else gateMsg=GATE_NOTFOUND;
+    }catch(e){}
+  }
+  render();
+})();
 </script>
 </body>
 </html>

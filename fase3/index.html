@@ -30,6 +30,28 @@
 
   .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 30px;min-height:44px}
 
+  .screen{flex:1;display:flex;flex-direction:column;animation:in .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .eyebrow{display:flex;align-items:center;gap:12px;font:600 12px Inter;letter-spacing:3px;
+    text-transform:uppercase;color:var(--gold-deep);margin-bottom:20px}
+  .eyebrow::before{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
+  h1.q{font:400 clamp(30px,6.2vw,40px)/1.12 var(--serif);letter-spacing:0;margin-bottom:12px}
+  .sub{font:400 16px/1.5 Inter;color:var(--muted);margin:-2px 0 24px}
+  .body{margin-top:10px}
+  input.fld{width:100%;border:1.5px solid var(--line);border-radius:14px;background:#fff;
+    padding:17px 18px;font:500 17px Inter;color:var(--ink);outline:none;transition:.18s}
+  input.fld::placeholder{color:#b6bcc6}
+  input.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
+  .foot{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding:32px 0 8px;margin-top:auto}
+  .next{display:inline-flex;align-items:center;gap:9px;background:var(--btn);color:#2a1f08;border:none;
+    font:700 15px Inter;letter-spacing:.2px;padding:15px 32px;border-radius:34px;cursor:pointer;transition:.18s;
+    box-shadow:0 10px 24px -12px rgba(184,134,11,.7)}
+  .next:hover{filter:brightness(1.04)}
+  .next:disabled{background:#edeef0;color:#aeb4be;box-shadow:none;cursor:not-allowed}
+  .gateerr{margin-top:14px;border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;
+    padding:14px 18px;font:500 14.5px/1.55 Inter;color:var(--gold-deep);animation:in .3s ease}
+  .gateerr a{display:inline-block;margin-top:8px;font:700 14px Inter;color:var(--gold-deep)}
+
   .hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 0 0;text-align:center;align-items:center}
   .hero .kick{font:600 12px Inter;letter-spacing:3px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:18px}
   .hero h1{font:400 clamp(34px,8vw,52px)/1.08 var(--serif);letter-spacing:0;margin-bottom:16px;max-width:600px}
@@ -111,7 +133,8 @@ function sendSupabase(status){
     const p=buildPayload(status);
     const row={id:p.id,fase:p.fase,formulario:p.formulario,status:p.status,
       step:(status==="concluido"?1:0),
-      nome:p.nome,email:p.email,whatsapp:p.whatsapp,respostas:{},atualizado_em:p.atualizado_em};
+      nome:p.nome,email:p.email,whatsapp:p.whatsapp,
+      respostas:{lead_id_origem:ans._origem||null},atualizado_em:p.atualizado_em};
     fetch(SUPABASE_URL+"/rest/v1/leads?on_conflict=id",{method:"POST",keepalive:true,
       headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
       "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
@@ -120,6 +143,68 @@ function sendSupabase(status){
 }
 
 function firstName(){ return (ans.nome||"").trim().split(/\s+/)[0]||""; }
+
+/* ===== Identificação por e-mail (base do Supabase) ===== */
+const FORM_CADASTRO="https://lojaexclusiva.escoladodolar.com/";
+const GATE_NOTFOUND=`<div class="gateerr">A gente não achou esse e-mail na nossa base. Confere se digitou certinho — ou, se ainda não fez a primeira etapa, começa por ela:<br><a href="${FORM_CADASTRO}">Fazer meu cadastro &rarr;</a></div>`;
+const GATE_OFFLINE=`<div class="gateerr">Não conseguimos verificar agora. Espera um instante e tenta de novo.</div>`;
+let identified=false, checking=false, gateMsg="";
+
+function emailOk(v){return /.+@.+\..+/.test((v||"").trim())}
+
+async function lookupEmail(email){
+  const q=encodeURIComponent((email||"").trim());
+  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=id,nome,email,whatsapp,formulario&email=ilike."+q+"&order=atualizado_em.desc&limit=10",
+    {headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY}});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const rows=await r.json();
+  return rows.find(x=>x.formulario==="reconhecimento")||rows[0]||null;
+}
+
+function aplicarIdentidade(row){
+  identified=true;
+  ans._origem=row.id;
+  ans.email=row.email||ans.email;
+  if(row.nome) ans.nome=row.nome;
+  if(row.whatsapp) ans.whatsapp=row.whatsapp;
+}
+
+function entrar(){
+  sendWebhook("novo_lead");
+  renderWelcome();
+}
+
+function renderGate(){
+  const hdr=document.getElementById('brand'); if(hdr) hdr.style.display='flex';
+  app.innerHTML=`
+    <div class="nav"></div>
+    <div class="screen">
+      <div class="eyebrow">Identificação</div>
+      <h1 class="q">Pra continuar, qual seu <span class="b ital">e-mail</span>?</h1>
+      <div class="sub">É o mesmo e-mail que você cadastrou na primeira etapa (o da compra na Hotmart).</div>
+      <div class="body">
+        <input class="fld" id="gmail" type="email" placeholder="voce@email.com" value="${(ans.email||"").replace(/"/g,'&quot;')}" autocomplete="email">
+        <div id="gmsg">${gateMsg}</div>
+      </div>
+      <div class="foot"><button class="next" id="gnext">Continuar</button></div>
+    </div>`;
+  gateMsg="";
+  const f=document.getElementById("gmail"), btn=document.getElementById("gnext"), box=document.getElementById("gmsg");
+  const upd=()=>{btn.disabled=checking||!emailOk(f.value)};
+  f.oninput=upd;
+  f.onkeydown=e=>{if(e.key==="Enter"&&!btn.disabled)btn.click()};
+  btn.onclick=async()=>{
+    if(checking) return;
+    checking=true; btn.textContent="Verificando…"; upd();
+    try{
+      const row=await lookupEmail(f.value);
+      if(row){ aplicarIdentidade(row); checking=false; entrar(); return; }
+      box.innerHTML=GATE_NOTFOUND;
+    }catch(e){ box.innerHTML=GATE_OFFLINE; }
+    checking=false; btn.textContent="Continuar"; upd();
+  };
+  f.focus(); upd();
+}
 
 function renderWelcome(){
   const n=firstName();
@@ -165,8 +250,17 @@ function renderFinal(){
     </div>`;
 }
 
-sendWebhook("novo_lead");
-renderWelcome();
+(async function init(){
+  if(ans.email&&emailOk(ans.email)){
+    try{
+      const row=await lookupEmail(ans.email);
+      if(row) aplicarIdentidade(row);
+      else gateMsg=GATE_NOTFOUND;
+    }catch(e){}
+  }
+  if(identified) entrar();
+  else renderGate();
+})();
 </script>
 </body>
 </html>
