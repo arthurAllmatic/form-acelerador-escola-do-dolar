@@ -221,13 +221,17 @@ async function load(manual){
 }
 
 function grupos(){
+  // Conta PESSOAS (agrupadas por e-mail), não registros brutos — bate com a lista.
+  // Cada pessoa entra uma vez por formulário, com o status mais recente dela nesse form.
   const g={};
   for(const k of Object.keys(FORMS)) g[k]={total:0,novo_lead:0,em_andamento:0,concluido:0};
-  for(const l of leads){
-    const f=l.formulario||"outro";
-    if(!g[f]) g[f]={total:0,novo_lead:0,em_andamento:0,concluido:0};
-    g[f].total++;
-    if(g[f][l.status]!==undefined) g[f][l.status]++;
+  for(const grp of agrupar(leads)){
+    for(const f of Object.keys(grp.porForm)){
+      if(!g[f]) g[f]={total:0,novo_lead:0,em_andamento:0,concluido:0};
+      const l=grp.porForm[f];
+      g[f].total++;
+      if(g[f][l.status]!==undefined) g[f][l.status]++;
+    }
   }
   return g;
 }
