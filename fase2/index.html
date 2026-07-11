@@ -159,9 +159,11 @@ const SIM="Já tenho a minha", NAO="Quero que vocês criem pra mim";
 
 const STEPS=[
   {key:"nome_loja",n:1,type:"text",eyebrow:"Como você quer sua logo? · Pergunta 1 de 6",title:'Quase lá, {n}. Como sua loja vai <span class="b ital">se chamar</span>?',sub:"Pode mudar depois. De 3 a 30 letras.",placeholder:"Ex: Vitalle Co."},
-  {key:"tem_logo",n:2,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span> da sua loja?',sub:"Vai mandar a sua ou quer que a gente crie?",
+  {key:"pais",n:2,type:"single",eyebrow:"Sua loja · Onde vai vender",title:'Em qual <span class="b ital">país</span> você vai vender?',sub:"Isso define o idioma e a página certa da sua loja.",
+    options:["🇵🇹 Portugal","🇪🇸 Espanha"]},
+  {key:"tem_logo",n:3,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span> da sua loja?',sub:"Vai mandar a sua ou quer que a gente crie?",
     options:[{t:SIM,d:"Tenho no celular ou computador, é só subir"},{t:NAO,d:"Respondo umas perguntas rápidas e a equipe faz 3 opções"}]},
-  {key:"logo",n:3,type:"file",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">subir a sua</span>.',sub:"Toque pra escolher o arquivo da sua logo (PNG ou JPG, de preferência com fundo transparente). Máx 4 MB.",cond:a=>a.tem_logo===SIM,optional:true},
+  {key:"logo",n:4,type:"file",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">subir a sua</span>.',sub:"Toque pra escolher o arquivo da sua logo (PNG ou JPG, de preferência com fundo transparente). Máx 4 MB.",cond:a=>a.tem_logo===SIM,optional:true},
   {key:"estilo",n:4,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 3 de 7",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais combina com você.",cond:a=>a.tem_logo===NAO,
     options:[{t:"Elegante",d:"Sofisticado, que não sai de moda"},{t:"Moderno",d:"Clean, com ar tech"},{t:"Natural",d:"Orgânico, terroso"},{t:"Jovem",d:"Colorido, animado"},{t:"Profissional",d:"Confiável, sério"},{t:"Minimalista",d:"Direto ao ponto"}]},
   {key:"cor_loja",n:5,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 4 de 7",title:'Quais as <span class="b ital">cores da sua loja</span>?',sub:"Escolha a dupla que mais combina com sua loja.",cond:a=>a.tem_logo===NAO,
@@ -247,6 +249,7 @@ function buildPayload(step,status){
     nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
     respostas:{
       lead_id_origem:ans._origem||null,
+      pais:ans.pais||null,
       nome_loja:ans.nome_loja||null, tem_logo:ans.tem_logo||null,
       logo_arquivo:ans.logo_nome||null, logo_mime:ans.logo_mime||null, logo_base64:ans.logo_b64||null,
       estilo:ans.estilo||null, cor_loja:ans.cor_loja||null, cor_logo:ans.cor_logo||null,

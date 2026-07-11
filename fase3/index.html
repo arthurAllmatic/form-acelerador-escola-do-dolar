@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Escola do Dólar · Fase 3 — Como vai receber</title>
+<title>Escola do Dólar · Fase 3 — Sua logo está pronta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
     --gold:#b8860b;--gold-deep:#8a6a2c;--gold-soft:#faf4e4;--gold-line:#ecdcaf;
     --grad:linear-gradient(135deg,#8a6a2c,#caa64e 45%,#a6791f);
     --btn:linear-gradient(135deg,#c29a44,#eccf85 48%,#b8860b);
+    --green:#2e7d32;--green-soft:#e8f3e9;
     --serif:"DM Serif Display",Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -23,68 +24,65 @@
   .ital{font-style:italic}
 
   header.brand{display:flex;align-items:center;justify-content:center;background:#fff;padding:40px 24px 4px;width:100%;max-width:680px;margin:0 auto}
-  .brandlogo{width:min(380px,82vw);height:auto;object-fit:contain;display:block;margin:0 auto;filter:brightness(0)}
+  .brandlogo{width:min(320px,74vw);height:auto;object-fit:contain;display:block;margin:0 auto;filter:brightness(0)}
   .logofallback{font-family:var(--serif);font-size:26px;color:var(--ink)}
 
   .wrap{flex:1;display:flex;flex-direction:column;max-width:680px;width:100%;margin:0 auto;padding:0 24px 24px}
-
-  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 30px;min-height:44px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 24px;min-height:36px}
 
   .screen{flex:1;display:flex;flex-direction:column;animation:in .5s cubic-bezier(.2,.7,.2,1)}
   @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .eyebrow{display:flex;align-items:center;gap:12px;font:600 12px Inter;letter-spacing:3px;
     text-transform:uppercase;color:var(--gold-deep);margin-bottom:20px}
   .eyebrow::before{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
-  h1.q{font:400 clamp(30px,6.2vw,40px)/1.12 var(--serif);letter-spacing:0;margin-bottom:12px}
-  .sub{font:400 16px/1.5 Inter;color:var(--muted);margin:-2px 0 24px}
-  .body{margin-top:10px}
+  h1.q{font:400 clamp(30px,6.2vw,42px)/1.12 var(--serif);letter-spacing:0;margin-bottom:12px}
+  .sub{font:400 16px/1.55 Inter;color:var(--muted);margin:-2px 0 24px;max-width:540px}
+  .body{margin-top:6px}
   input.fld{width:100%;border:1.5px solid var(--line);border-radius:14px;background:#fff;
     padding:17px 18px;font:500 17px Inter;color:var(--ink);outline:none;transition:.18s}
   input.fld::placeholder{color:#b6bcc6}
   input.fld:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft)}
-  .foot{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding:32px 0 8px;margin-top:auto}
+  .foot{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding:32px 0 8px}
   .next{display:inline-flex;align-items:center;gap:9px;background:var(--btn);color:#2a1f08;border:none;
     font:700 15px Inter;letter-spacing:.2px;padding:15px 32px;border-radius:34px;cursor:pointer;transition:.18s;
     box-shadow:0 10px 24px -12px rgba(184,134,11,.7)}
   .next:hover{filter:brightness(1.04)}
   .next:disabled{background:#edeef0;color:#aeb4be;box-shadow:none;cursor:not-allowed}
   .gateerr{margin-top:14px;border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;
-    padding:14px 18px;font:500 14.5px/1.55 Inter;color:var(--gold-deep);animation:in .3s ease}
-  .gateerr a{display:inline-block;margin-top:8px;font:700 14px Inter;color:var(--gold-deep)}
+    padding:15px 18px;font:500 14.5px/1.6 Inter;color:var(--gold-deep);animation:in .3s ease}
+  .gateerr a{display:inline-block;margin-top:10px;font:700 14px Inter;color:var(--gold-deep)}
 
-  .hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 0 0;text-align:center;align-items:center}
-  .hero .kick{font:600 12px Inter;letter-spacing:3px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:18px}
-  .hero h1{font:400 clamp(34px,8vw,52px)/1.08 var(--serif);letter-spacing:0;margin-bottom:16px;max-width:600px}
-  .hero p{font:400 17px/1.7 Inter;color:#4a4651;max-width:520px;margin-bottom:28px}
-  .videobox{width:100%;max-width:560px;aspect-ratio:16/9;border:1.8px dashed var(--gold-line);border-radius:18px;
-    background:var(--gold-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:30px}
-  .videobox .play{width:58px;height:58px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
-  .videobox span{font:600 13px Inter;letter-spacing:1px;text-transform:uppercase;color:var(--gold-deep)}
-  .start{background:var(--btn);color:#2a1f08;border:none;font:700 15px Inter;letter-spacing:.3px;padding:17px 40px;
-    border-radius:36px;cursor:pointer;box-shadow:0 12px 28px -12px rgba(184,134,11,.75);transition:.18s}
-  .start:hover{filter:brightness(1.04)}
+  /* Entrega da logo */
+  .logocard{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:20px;
+    padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;margin:4px 0 22px}
+  .logoimg{max-width:min(360px,100%);max-height:240px;object-fit:contain;border-radius:14px;
+    background:#fff;padding:16px;border:1px solid var(--line);display:block}
+  .logopend{width:100%;aspect-ratio:2/1;max-width:360px;border:1.8px dashed var(--gold-line);border-radius:14px;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;
+    font:500 14px/1.5 Inter;color:var(--gold-deep);background:#fff}
+  .dl{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--btn);color:#2a1f08;border:none;
+    font:700 15px Inter;letter-spacing:.2px;padding:16px 34px;border-radius:34px;cursor:pointer;transition:.18s;
+    box-shadow:0 10px 24px -12px rgba(184,134,11,.7)}
+  .dl:hover{filter:brightness(1.04)}
+  .dl:disabled{opacity:.7;cursor:default}
 
-  .thanks{flex:1;min-height:calc(100dvh - 120px);position:relative;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;padding:30px 8px;overflow:hidden}
-  .wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--serif);
-    font-size:clamp(60px,16vw,150px);line-height:1;color:var(--ink);opacity:.04;letter-spacing:1px;
-    white-space:nowrap;pointer-events:none;z-index:0;max-width:100%}
-  .thanks>*{position:relative;z-index:1}
-  .thanks .eyebrow{display:flex;align-items:center;gap:12px;justify-content:center;font:600 12px Inter;letter-spacing:3px;
-    text-transform:uppercase;color:var(--gold-deep);margin-bottom:20px}
-  .thanks .eyebrow::before,.thanks .eyebrow::after{content:"";width:28px;height:1.5px;background:var(--grad);border-radius:2px}
-  .thanks h1{font:400 clamp(36px,7vw,56px)/1.06 var(--serif);letter-spacing:0;margin:0 0 18px;max-width:680px}
-  .thanks p{font:400 clamp(15px,2.4vw,17px)/1.65 Inter;color:#4a4651;max-width:520px;margin:0 auto 28px}
-
-  .plan{text-align:left;max-width:520px;width:100%;margin:0 auto 26px;display:flex;flex-direction:column;gap:14px}
-  .planc{border:1.5px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff}
-  .planc h4{font:600 12px Inter;letter-spacing:2px;text-transform:uppercase;color:var(--gold-deep);margin-bottom:10px}
-  .planc ul{list-style:none;display:flex;flex-direction:column;gap:7px}
-  .planc li{font:500 15px/1.4 Inter;color:#4a4651;padding-left:18px;position:relative}
-  .planc li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--grad)}
-  .notebar{display:flex;align-items:center;gap:10px;max-width:520px;width:100%;margin:0 auto 26px;border:1.5px solid var(--gold-line);
-    background:var(--gold-soft);border-radius:14px;padding:14px 18px;font:500 14.5px Inter;color:var(--gold-deep);text-align:left}
-  .thanks .ty-end{font:400 clamp(28px,5.5vw,38px) var(--serif);font-style:italic;display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  /* Reveal do resgatar */
+  .reveal{display:none;margin-top:8px;border-top:1px dashed var(--gold-line);padding-top:26px;animation:in .4s ease}
+  .reveal.on{display:block}
+  .reveal h2{font:400 clamp(24px,5vw,32px)/1.15 var(--serif);margin-bottom:12px}
+  .steplist{list-style:none;display:flex;flex-direction:column;gap:12px;margin:16px 0 24px}
+  .steplist li{display:flex;gap:12px;font:500 15px/1.5 Inter;color:#4a4651;align-items:flex-start}
+  .steplist .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--gold-soft);border:1.5px solid var(--gold-line);
+    color:var(--gold-deep);font:700 13px Inter;display:flex;align-items:center;justify-content:center}
+  .resgatar{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    background:var(--btn);color:#2a1f08;border:none;font:700 16px Inter;letter-spacing:.2px;
+    padding:18px 34px;border-radius:36px;cursor:pointer;transition:.18s;text-decoration:none;
+    box-shadow:0 12px 28px -12px rgba(184,134,11,.75)}
+  .resgatar:hover{filter:brightness(1.04)}
+  .okpill{display:inline-flex;align-items:center;gap:8px;font:600 13px Inter;color:var(--green);
+    background:var(--green-soft);border-radius:20px;padding:8px 14px;margin-bottom:14px}
+  .infobar{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;
+    padding:14px 18px;font:500 14px/1.55 Inter;color:var(--gold-deep)}
 </style>
 </head>
 <body>
@@ -95,14 +93,18 @@
   <main class="wrap" id="app"></main>
 
 <script>
-const FASE="fase3", FORMULARIO="como_vai_receber";
+const FASE="fase3", FORMULARIO="entrega_logo";
 const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
 
-/* ===== SUPABASE (config única — preencher com as credenciais do projeto) ===== */
+/* ===== SUPABASE ===== */
 const SUPABASE_URL="https://wiktreeseddzzhbsbwkz.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpa3RyZWVzZWRkenpoYnNid2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDkwMDgsImV4cCI6MjA3NzUyNTAwOH0.U-X9n-SK0zLC7ZU_RBXYvXjRpLTnOAqTWJxMOmY5JFk";
 
-/* Identidade vem da URL: ?nome=Maria&email=maria@x.com&whatsapp=27998233325 */
+/* Builder por produto+país (planilha): .../lp/{produto}-{pais} */
+const BUILDER_BASE="https://escoladodolar-edd.prostore.ai/lp";
+const FORM_RECONHECIMENTO="https://lojaexclusiva.escoladodolar.com/";
+const FORM_FASE2="https://lojaexclusiva.escoladodolar.com/fase2/";
+
 const Q=new URLSearchParams(location.search);
 function qp(){for(const k of arguments){const v=Q.get(k);if(v)return v;}return "";}
 
@@ -114,152 +116,207 @@ const ans={
   whatsapp:qp("whatsapp","telefone","phone","wpp","celular","tel","fone"),
   ddi:qp("ddi")||"+55"
 };
+/* Dados descobertos na base */
+const perfil={ origem:null, nicho:null, pais:null, produto:null, builder:null, logo_url:null, nome_loja:null };
 
-function buildPayload(status){
+let checking=false;
+function emailOk(v){return /.+@.+\..+/.test((v||"").trim())}
+function firstName(){ return (ans.nome||"").trim().split(/\s+/)[0]||""; }
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+/* nicho -> produto */
+function nichoProduto(nicho){
+  const n=String(nicho||"").toLowerCase();
+  if(n.includes("longevidade")) return {nome:"NAD+",slug:"nad"};
+  if(n.includes("vitalidade")) return {nome:"Shilajit",slug:"shilajit"};
+  if(n.includes("masculina")) return {nome:"Vigor",slug:"vigor"};
+  return null; // "escolha pra mim" / desconhecido — equipe define
+}
+/* país -> código */
+function paisCode(pais){
+  const p=String(pais||"").toLowerCase();
+  if(p.includes("portugal")) return "pt";
+  if(p.includes("espanha")||p.includes("españa")) return "es";
+  return null;
+}
+
+/* ===== Tracking ===== */
+function buildPayload(status,step,extras){
   return {
-    id:ans._id, fase:FASE, formulario:FORMULARIO, status:status,
+    id:ans._id, fase:FASE, formulario:FORMULARIO, status:status, step:step,
     nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
+    respostas:Object.assign({
+      lead_id_origem:perfil.origem||null, pais:perfil.pais||null,
+      produto:perfil.produto?perfil.produto.nome:null, builder_link:perfil.builder||null
+    },extras||{}),
     atualizado_em:new Date().toISOString()
   };
 }
-function sendWebhook(status){
+function reportar(status,step,extras){
+  const p=buildPayload(status,step,extras);
+  const body=JSON.stringify(p);
   try{ fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
-    headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(buildPayload(status))}); }catch(e){}
-  sendSupabase(status);
-}
-function sendSupabase(status){
+    headers:{"Content-Type":"text/plain;charset=UTF-8"},body}); }catch(e){}
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
   try{
-    const p=buildPayload(status);
-    const row={id:p.id,fase:p.fase,formulario:p.formulario,status:p.status,
-      step:(status==="concluido"?1:0),
-      nome:p.nome,email:p.email,whatsapp:p.whatsapp,
-      respostas:{lead_id_origem:ans._origem||null},atualizado_em:p.atualizado_em};
     fetch(SUPABASE_URL+"/rest/v1/leads?on_conflict=id",{method:"POST",keepalive:true,
       headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
-      "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
-      body:JSON.stringify(row)});
+      "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body});
   }catch(e){}
 }
 
-function firstName(){ return (ans.nome||"").trim().split(/\s+/)[0]||""; }
-
-/* ===== Identificação por e-mail (base do Supabase) ===== */
-const FORM_CADASTRO="https://lojaexclusiva.escoladodolar.com/";
-const GATE_NOTFOUND=`<div class="gateerr">A gente não achou esse e-mail na nossa base. Confere se digitou certinho — ou, se ainda não fez a primeira etapa, começa por ela:<br><a href="${FORM_CADASTRO}">Fazer meu cadastro &rarr;</a></div>`;
-const GATE_OFFLINE=`<div class="gateerr">Não conseguimos verificar agora. Espera um instante e tenta de novo.</div>`;
-let identified=false, checking=false, gateMsg="";
-
-function emailOk(v){return /.+@.+\..+/.test((v||"").trim())}
-
-async function lookupEmail(email){
+async function lookupTudo(email){
   const q=encodeURIComponent((email||"").trim());
-  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=id,nome,email,whatsapp,formulario&email=ilike."+q+"&order=atualizado_em.desc&limit=10",
+  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=*&email=ilike."+q+"&order=atualizado_em.desc",
     {headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY}});
   if(!r.ok) throw new Error("HTTP "+r.status);
-  const rows=await r.json();
-  return rows.find(x=>x.formulario==="reconhecimento")||rows[0]||null;
+  return await r.json();
 }
+function maisRecente(rows,form){ return rows.find(x=>x.formulario===form)||null; }
+function concluiu(rec){ return rec && rec.status==="concluido"; }
 
-function aplicarIdentidade(row){
-  identified=true;
-  ans._origem=row.id;
-  ans.email=row.email||ans.email;
-  if(row.nome) ans.nome=row.nome;
-  if(row.whatsapp) ans.whatsapp=row.whatsapp;
-}
-
-function entrar(){
-  sendWebhook("novo_lead");
-  renderWelcome();
-}
-
-function renderGate(){
+/* ===== Telas ===== */
+function renderGate(msg){
   const hdr=document.getElementById('brand'); if(hdr) hdr.style.display='flex';
   app.innerHTML=`
     <div class="nav"></div>
     <div class="screen">
-      <div class="eyebrow">Identificação</div>
-      <h1 class="q">Pra continuar, qual seu <span class="b ital">e-mail</span>?</h1>
-      <div class="sub">É o mesmo e-mail que você cadastrou na primeira etapa (o da compra na Hotmart).</div>
+      <div class="eyebrow">Fase 3 · Sua logo</div>
+      <h1 class="q">Pra ver sua logo, qual seu <span class="b ital">e-mail</span>?</h1>
+      <div class="sub">É o mesmo e-mail que você usou nas etapas anteriores (o da compra na Hotmart).</div>
       <div class="body">
-        <input class="fld" id="gmail" type="email" placeholder="voce@email.com" value="${(ans.email||"").replace(/"/g,'&quot;')}" autocomplete="email">
-        <div id="gmsg">${gateMsg}</div>
+        <input class="fld" id="gmail" type="email" placeholder="voce@email.com" value="${esc(ans.email||"")}" autocomplete="email">
+        <div id="gmsg">${msg||""}</div>
       </div>
-      <div class="foot"><button class="next" id="gnext">Continuar</button></div>
+      <div class="foot"><button class="next" id="gnext">Ver minha logo</button></div>
     </div>`;
-  gateMsg="";
   const f=document.getElementById("gmail"), btn=document.getElementById("gnext"), box=document.getElementById("gmsg");
   const upd=()=>{btn.disabled=checking||!emailOk(f.value)};
   f.oninput=upd;
   f.onkeydown=e=>{if(e.key==="Enter"&&!btn.disabled)btn.click()};
-  btn.onclick=async()=>{
-    if(checking) return;
-    checking=true; btn.textContent="Verificando…"; upd();
-    try{
-      const row=await lookupEmail(f.value);
-      if(row){ aplicarIdentidade(row); checking=false; entrar(); return; }
-      box.innerHTML=GATE_NOTFOUND;
-    }catch(e){ box.innerHTML=GATE_OFFLINE; }
-    checking=false; btn.textContent="Continuar"; upd();
-  };
+  btn.onclick=()=>confirmarEmail(f.value,btn,box,upd);
   f.focus(); upd();
 }
 
-function renderWelcome(){
-  const n=firstName();
-  app.innerHTML=`
-    <div class="nav"></div>
-    <div class="hero">
-      <div class="kick">Fase 3 · Última parte</div>
-      <h1>Quase lá${n?", "+n:""}. <span class="b ital">Última parte.</span></h1>
-      <p>Tá tudo pronto do seu lado. Falta só a gente finalizar a sua loja e te chamar. Toca pra confirmar.</p>
-      <button class="start" id="start">Continuar &rarr;</button>
-    </div>`;
-  document.getElementById("start").onclick=()=>{ sendWebhook("concluido"); renderFinal(); };
+async function confirmarEmail(email,btn,box,upd){
+  if(checking) return;
+  checking=true; btn.textContent="Verificando…"; upd();
+  let rows;
+  try{ rows=await lookupTudo(email); }
+  catch(e){ box.innerHTML=`<div class="gateerr">Não conseguimos verificar agora. Espera um instante e tenta de novo.</div>`; checking=false; btn.textContent="Ver minha logo"; upd(); return; }
+
+  ans.email=(email||"").trim();
+  if(!rows||!rows.length){
+    box.innerHTML=`<div class="gateerr">A gente não achou esse e-mail na nossa base. Confere se digitou certinho — ou comece pela primeira etapa:<br><a href="${FORM_RECONHECIMENTO}">Fazer meu cadastro &rarr;</a></div>`;
+    checking=false; btn.textContent="Ver minha logo"; upd(); return;
+  }
+  const rec=maisRecente(rows,"reconhecimento");
+  const bri=maisRecente(rows,"briefing_logo");
+  // identidade
+  const base=rec||rows[0];
+  if(base){ ans.nome=base.nome||ans.nome; ans.whatsapp=base.whatsapp||ans.whatsapp; }
+
+  if(!concluiu(rec)){
+    box.innerHTML=`<div class="gateerr">Vimos que você ainda não terminou a <b>Fase 1 (Reconhecimento)</b>. Faça ela primeiro pra liberar sua logo:<br><a href="${FORM_RECONHECIMENTO}">Fazer a Fase 1 &rarr;</a></div>`;
+    checking=false; btn.textContent="Ver minha logo"; upd(); return;
+  }
+  if(!concluiu(bri)){
+    box.innerHTML=`<div class="gateerr">Falta terminar a <b>Fase 2 (Sua Logo)</b> pra gente poder gerar e liberar sua logo:<br><a href="${FORM_FASE2}?email=${encodeURIComponent(ans.email)}">Fazer a Fase 2 &rarr;</a></div>`;
+    checking=false; btn.textContent="Ver minha logo"; upd(); return;
+  }
+
+  // Tudo certo — monta o perfil
+  const br=bri.respostas||{};
+  perfil.origem=rec.id;
+  perfil.nicho=(rec.respostas||{}).nicho||(rec.respostas||{}).categoria||null;
+  perfil.pais=br.pais||null;
+  perfil.produto=nichoProduto(perfil.nicho);
+  perfil.nome_loja=br.nome_loja||null;
+  perfil.logo_url=br.logo_gerada_url||null;
+  const code=paisCode(perfil.pais);
+  perfil.builder=(perfil.produto&&code)?`${BUILDER_BASE}/${perfil.produto.slug}-${code}`:null;
+
+  checking=false;
+  reportar("novo_lead",0,{logo_baixada:false});
+  renderEntrega();
 }
 
-function renderFinal(){
+async function baixarLogo(btn){
+  if(!perfil.logo_url) return;
+  btn.disabled=true; const orig=btn.innerHTML; btn.innerHTML="Baixando…";
+  const nomeArq=(perfil.nome_loja?perfil.nome_loja.replace(/[^\w\-]+/g,"-"):"logo")+".png";
+  try{
+    const r=await fetch(perfil.logo_url,{cache:"no-store"});
+    const b=await r.blob();
+    const u=URL.createObjectURL(b);
+    const a=document.createElement("a"); a.href=u; a.download=nomeArq;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),4000);
+  }catch(e){ window.open(perfil.logo_url,"_blank"); }
+  btn.innerHTML="✓ Logo baixada";
+  reportar("em_andamento",1,{logo_baixada:true});
+  document.getElementById("reveal").classList.add("on");
+  setTimeout(()=>{document.getElementById("reveal").scrollIntoView({behavior:"smooth",block:"start"});},120);
+}
+
+function renderEntrega(){
   const n=firstName();
-  document.getElementById('brand').style.display='none';
+  const temLogo=!!perfil.logo_url;
+  const logoBloco=temLogo
+    ? `<img class="logoimg" src="${esc(perfil.logo_url)}" alt="Sua logo">`
+    : `<div class="logopend">Sua logo ainda está sendo finalizada pela equipe.<br>Volte pelo link que te enviarmos em breve. 💛</div>`;
+  const btnDl=temLogo
+    ? `<button class="dl" id="dl">⬇ Baixar minha logo</button>`
+    : ``;
+
+  // Bloco resgatar (revelado após baixar)
+  const temBuilder=!!perfil.builder;
+  const resgatarBtn=temBuilder
+    ? `<a class="resgatar" id="resgatar" href="${esc(perfil.builder)}" target="_blank" rel="noopener">🚀 Resgatar minha loja</a>`
+    : `<div class="infobar">Assim que a equipe definir o seu produto, te enviamos o link do resgate da loja pelo WhatsApp. 💛</div>`;
+
+  const hdr=document.getElementById('brand'); if(hdr) hdr.style.display='flex';
   app.innerHTML=`
-    <div class="thanks">
-      <div class="wm">Pronto</div>
-      <div class="eyebrow">Obrigado${n?", "+n:""}</div>
-      <h1>Pronto! Agora é com a <span class="b ital">nossa equipe</span>.</h1>
-      <p>Nosso time está preparando sua loja. A gente te avisa pelo WhatsApp em até <b>24 horas</b>.</p>
-      <div class="plan">
-        <div class="planc">
-          <h4>Você (agora)</h4>
-          <ul>
-            <li>Fica de olho no WhatsApp nas próximas 24 horas</li>
-            <li>Já vai separando os primeiros produtos que quer vender</li>
-          </ul>
+    <div class="nav"></div>
+    <div class="screen">
+      <div class="okpill">✓ Logo gerada pela equipe</div>
+      <h1 class="q">${n?n+", sua":"Sua"} <span class="b ital">logo está pronta</span>.</h1>
+      <div class="sub">Nossa equipe criou a identidade da sua loja${perfil.nome_loja?` <b>${esc(perfil.nome_loja)}</b>`:""}. Baixa ela aqui — você vai usar na sua loja.</div>
+      <div class="body">
+        <div class="logocard">
+          ${logoBloco}
+          ${btnDl}
         </div>
-        <div class="planc">
-          <h4>Nossa equipe (ao mesmo tempo)</h4>
-          <ul>
-            <li>Cria 3 opções de logo no seu jeito</li>
-            <li>Escreve a descrição da sua loja</li>
-            <li>Escolhe os fornecedores e produtos da sua loja</li>
+
+        <div class="reveal" id="reveal">
+          <h2>Agora vamos <span class="b ital">resgatar a sua loja</span>.</h2>
+          <p class="sub" style="margin-bottom:6px">Com a logo em mãos, é hora de criar a sua loja e deixar tudo pronto pra vender${perfil.pais?` em <b>${esc(perfil.pais)}</b>`:""}${perfil.produto?` com <b>${esc(perfil.produto.nome)}</b>`:""}.</p>
+          <ul class="steplist">
+            <li><span class="n">1</span><span>Crie a sua conta na <b>Shopify</b> (é rápido, a gente te guia na próxima página).</span></li>
+            <li><span class="n">2</span><span>Resgate a sua loja e siga o passo a passo pra deixar tudo no ar.</span></li>
           </ul>
+          ${resgatarBtn}
         </div>
       </div>
-      <div class="notebar">💬 A gente te avisa pelo WhatsApp em até 24 horas.</div>
-      <div class="ty-end">Vem que a meta é euro!</div>
     </div>`;
+
+  const dl=document.getElementById("dl");
+  if(dl) dl.onclick=()=>baixarLogo(dl);
+  const rg=document.getElementById("resgatar");
+  if(rg) rg.onclick=()=>{ reportar("concluido",2,{logo_baixada:true,resgatou:true}); };
 }
 
 (async function init(){
-  if(ans.email&&emailOk(ans.email)){
-    try{
-      const row=await lookupEmail(ans.email);
-      if(row) aplicarIdentidade(row);
-      else gateMsg=GATE_NOTFOUND;
-    }catch(e){}
+  if(emailOk(ans.email)){
+    // tenta identificar sozinho quando ?email= já veio
+    const fake={disabled:false,textContent:"",innerHTML:""};
+    const box={innerHTML:""};
+    // reaproveita confirmarEmail com elementos "fantasma" seria frágil — renderiza o gate já preenchido
+    renderGate("");
+    document.getElementById("gnext").click();
+    return;
   }
-  if(identified) entrar();
-  else renderGate();
+  renderGate("");
 })();
 </script>
 </body>

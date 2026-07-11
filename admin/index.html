@@ -162,6 +162,7 @@ const REFRESH_MS=15000;
 const FORMS={
   reconhecimento:{label:"Reconhecimento",fase:"Fase 1"},
   briefing_logo:{label:"Sua Logo",fase:"Fase 2"},
+  entrega_logo:{label:"Logo & Resgate",fase:"Fase 3"},
   como_vai_receber:{label:"Como vai receber",fase:"Fase 3"},
   instalar_tema:{label:"Instalar Tema",fase:"Sobe Tema"}
 };
@@ -181,7 +182,8 @@ const RESP_LABELS={
   logo_prompt:"Prompt da logo (IA)",
   loja_shopify:"Loja Shopify",tema_instalado:"Tema instalado",ultimo_erro:"Último erro",
   pais:"País",produto:"Produto",idioma:"Idioma",cor:"Cor aplicada",
-  banner:"Banner aplicado",banner_fallback:"Banner (fallback)",logo:"Logo aplicada",cores:"Cores aplicadas"
+  banner:"Banner aplicado",banner_fallback:"Banner (fallback)",logo:"Logo aplicada",cores:"Cores aplicadas",
+  builder_link:"Link do builder",logo_baixada:"Baixou a logo",resgatou:"Resgatou a loja"
 };
 
 let leads=[], filtroForm=null, busca="", aberto=new Set(), timer=null;
@@ -236,7 +238,7 @@ function grupos(){
   return g;
 }
 
-const ORDEM_FORMS={reconhecimento:1,briefing_logo:2,como_vai_receber:3};
+const ORDEM_FORMS={reconhecimento:1,briefing_logo:2,entrega_logo:3,como_vai_receber:3,instalar_tema:4};
 
 /* Agrupa por e-mail: uma pessoa = uma linha; cada etapa vira histórico dentro dela.
    Se houver mais de um registro da mesma etapa pro mesmo e-mail, mostra o mais recente. */
