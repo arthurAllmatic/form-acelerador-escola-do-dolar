@@ -142,20 +142,28 @@ export default async function handler(req, res){
       result.moveErr = opp ? `etapa "${action.stage}" não encontrada` : "oportunidade não encontrada nesse pipeline";
     }
 
-    // cria tarefa pra Angélica
+    // cria tarefa pra Angélica — prazo 24h e sem duplicar (se já existe uma aberta igual, pula)
     if (action.task){
       const due = new Date();
-      due.setDate(due.getDate() + (action.task.dueInDays || 0));
-      const t = {
-        title: action.task.title,
-        body: `Lead: ${body.nome||""} — ${body.email||""} ${body.whatsapp||""}`.trim(),
-        dueDate: due.toISOString(),
-        completed: false
-      };
-      if (cfg.assignee) t.assignedTo = cfg.assignee.id;
-      const tr = await api(`/contacts/${contact.id}/tasks`, { method:"POST", body: JSON.stringify(t) });
-      result.task = tr.ok;
-      if (!tr.ok) result.taskErr = tr.json;
+      due.setDate(due.getDate() + (action.task.dueInDays || 1)); // prazo padrão: 24h
+      const existing = await api(`/contacts/${contact.id}/tasks`);
+      const tasks = (existing.json && existing.json.tasks) || [];
+      const dup = tasks.find(t => norm(t.title) === norm(action.task.title) && !t.completed);
+      if (dup){
+        result.task = "ja_existia";
+        result.taskId = dup.id;
+      } else {
+        const t = {
+          title: action.task.title,
+          body: `Lead: ${body.nome||""} — ${body.email||""} ${body.whatsapp||""}`.trim(),
+          dueDate: due.toISOString(),
+          completed: false
+        };
+        if (cfg.assignee) t.assignedTo = cfg.assignee.id;
+        const tr = await api(`/contacts/${contact.id}/tasks`, { method:"POST", body: JSON.stringify(t) });
+        result.task = tr.ok;
+        if (!tr.ok) result.taskErr = tr.json;
+      }
     }
 
     return res.status(200).json({ ok:true, ...result });
