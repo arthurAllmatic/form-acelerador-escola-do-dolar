@@ -152,11 +152,16 @@ function buildPayload(status,step,extras){
     atualizado_em:new Date().toISOString()
   };
 }
+function sendGHL(status){
+  try{ fetch("/api/ghl",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fase:FASE,status,nome:ans.nome||"",email:(ans.email||"").trim(),whatsapp:ans.whatsapp||""})}); }catch(e){}
+}
 function reportar(status,step,extras){
   const p=buildPayload(status,step,extras);
   const body=JSON.stringify(p);
   try{ fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
     headers:{"Content-Type":"text/plain;charset=UTF-8"},body}); }catch(e){}
+  sendGHL(status);
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
   try{
     fetch(SUPABASE_URL+"/rest/v1/leads?on_conflict=id",{method:"POST",keepalive:true,
