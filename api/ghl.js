@@ -100,10 +100,28 @@ export default async function handler(req, res){
   if (!process.env.GHL_TOKEN || !loc)
     return res.status(200).json({ ok:false, error:"faltando GHL_TOKEN ou GHL_LOCATION_ID nas env vars do Vercel" });
 
-  // GET = diagnóstico rápido: /api/ghl?debug=1
+  // GET = diagnóstico. ?debug=1 (config) ou ?email=... (etapa atual do card, read-only)
   if (req.method === "GET"){
     try {
       const cfg = await loadConfig(loc);
+      const email = req.query && req.query.email;
+      if (email){
+        const contact = await findContact(loc, email, (req.query.whatsapp)||"");
+        if (!contact) return res.status(200).json({ ok:true, contato_encontrado:false, email });
+        const opp = await findOpportunity(loc, contact.id, cfg.pipeline && cfg.pipeline.id);
+        let etapaAtual = null;
+        if (opp){
+          const st = (cfg.stages||[]).find(s => s.id === opp.pipelineStageId);
+          etapaAtual = st ? st.name : opp.pipelineStageId;
+        }
+        return res.status(200).json({
+          ok:true, email, contactId: contact.id,
+          oportunidade_encontrada: !!opp, oppId: opp ? opp.id : null,
+          pipeline_da_opp: opp ? opp.pipelineId : null,
+          pipeline_esperado: cfg.pipeline ? cfg.pipeline.id : null,
+          etapa_atual: etapaAtual
+        });
+      }
       return res.status(200).json({
         ok:true, diagnostico:true,
         pipeline: cfg.pipeline ? cfg.pipeline.name : null,
