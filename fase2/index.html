@@ -162,7 +162,7 @@ const STEPS=[
   {key:"pais",n:2,type:"single",eyebrow:"Sua loja · Onde vai vender",title:'Em qual <span class="b ital">país</span> você vai vender?',sub:"Isso define o idioma e a página certa da sua loja.",
     options:["🇵🇹 Portugal","🇪🇸 Espanha"]},
   {key:"tem_logo",n:3,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 2 de 6",title:'Você já tem uma <span class="b ital">logo pronta</span> da sua loja?',sub:"Vai mandar a sua ou quer que a gente crie?",
-    options:[{t:SIM,d:"Tenho no celular ou computador, é só subir"},{t:NAO,d:"Respondo umas perguntas rápidas e a equipe faz 3 opções"}]},
+    options:[{t:SIM,d:"Tenho no celular ou computador, é só subir"},{t:NAO,d:"Respondo umas perguntas rápidas e a equipe cria a minha logo (com direito a 2 alterações)"}]},
   {key:"logo",n:4,type:"file",eyebrow:"Sua logo",title:'Beleza! É só <span class="b ital">subir a sua</span>.',sub:"Toque pra escolher o arquivo da sua logo (PNG ou JPG, de preferência com fundo transparente). Máx 4 MB.",cond:a=>a.tem_logo===SIM,optional:true},
   {key:"estilo",n:4,type:"single",eyebrow:"Como você quer sua logo? · Pergunta 3 de 7",title:'Qual <span class="b ital">estilo</span> combina mais com sua loja?',sub:"Escolha o que mais combina com você.",cond:a=>a.tem_logo===NAO,
     options:[{t:"Elegante",d:"Sofisticado, que não sai de moda"},{t:"Moderno",d:"Clean, com ar tech"},{t:"Natural",d:"Orgânico, terroso"},{t:"Jovem",d:"Colorido, animado"},{t:"Profissional",d:"Confiável, sério"},{t:"Minimalista",d:"Direto ao ponto"}]},
@@ -472,7 +472,7 @@ function renderWelcome(){
     <div class="hero">
       <div class="kick">Agora sua logo</div>
       <h1>Hora de pensar na <span class="b ital">cara</span> da sua loja.</h1>
-      <p>${n?n+", você":"Você"} responde algumas perguntas rápidas e a equipe usa pra criar <b>3 opções de logo</b> no seu jeito.</p>
+      <p>${n?n+", você":"Você"} responde algumas perguntas rápidas e a equipe usa pra criar a <b>sua logo</b> no seu jeito — e você tem direito a <b>2 alterações</b>.</p>
       <div class="stepper">
         <div class="stp done"><span class="num">✓</span> Te conhecemos</div>
         <div class="stp cur"><span class="num">02</span> Estilo da sua logo (agora)</div>
@@ -493,7 +493,7 @@ function renderFinal(){
       <p>Nosso time está preparando sua loja. A gente te avisa pelo WhatsApp em até <b>24 horas</b>.</p>
       <div class="plan">
         <div class="planc"><h4>Você (agora)</h4><ul><li>Fica de olho no WhatsApp nas próximas 24 horas</li><li>Já vai separando os primeiros produtos que quer vender</li></ul></div>
-        <div class="planc"><h4>Nossa equipe (ao mesmo tempo)</h4><ul><li>Cria 3 opções de logo no seu jeito</li><li>Escreve a descrição da sua loja</li><li>Escolhe os fornecedores e produtos da sua loja</li></ul></div>
+        <div class="planc"><h4>Nossa equipe (ao mesmo tempo)</h4><ul><li>Cria a sua logo no seu jeito (com direito a 2 alterações)</li><li>Escreve a descrição da sua loja</li><li>Escolhe os fornecedores e produtos da sua loja</li></ul></div>
       </div>
       <div class="notebar">💬 A gente te avisa pelo WhatsApp em até 24 horas.</div>
       <div class="ty-end">Vem que a meta é euro!</div>
