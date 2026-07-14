@@ -152,9 +152,22 @@ function buildPayload(status,step,extras){
     atualizado_em:new Date().toISOString()
   };
 }
+function buildNotaGHL(){
+  const l=[];
+  if(perfil.nome_loja) l.push("• Nome da loja\n   "+perfil.nome_loja);
+  if(perfil.pais) l.push("• País\n   "+perfil.pais);
+  if(perfil.produto) l.push("• Produto\n   "+perfil.produto.nome);
+  if(perfil.builder) l.push("• Builder liberado\n   "+perfil.builder);
+  l.push("• Logo entregue e baixada pelo lead");
+  l.push('• Lead clicou em "Resgatar minha loja"');
+  return "📋 Fase 3 · Entrega da logo\n\n"+l.join("\n\n");
+}
 function sendGHL(status){
-  try{ fetch("/api/ghl",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({fase:FASE,status,nome:ans.nome||"",email:(ans.email||"").trim(),whatsapp:ans.whatsapp||""})}); }catch(e){}
+  try{
+    const p={fase:FASE,status,nome:ans.nome||"",email:(ans.email||"").trim(),whatsapp:ans.whatsapp||""};
+    if(status==="concluido") p.nota=buildNotaGHL();
+    fetch("/api/ghl",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+  }catch(e){}
 }
 function reportar(status,step,extras){
   const p=buildPayload(status,step,extras);

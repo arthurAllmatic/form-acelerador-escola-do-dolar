@@ -266,9 +266,24 @@ function sendWebhook(step,status){
   sendSupabase(step,status);
   sendGHL(status);
 }
+function stripHtml(s){return String(s==null?"":s).replace(/<[^>]+>/g," ").replace(/\s+/g," ").replace(/\s+([?.!,;:])/g,"$1").trim();}
+function buildNotaGHL(){
+  const l=[];
+  for(const s of seq()){
+    if(s.type==="info"||s.key==="logo") continue;
+    const v=ans[s.key];
+    if(v==null||v===""||(Array.isArray(v)&&!v.length)) continue;
+    const a=Array.isArray(v)?v.join(", "):(typeof v==="boolean"?(v?"Sim":"Não"):String(v));
+    l.push("• "+stripHtml(tok(s.title))+"\n   "+a);
+  }
+  return "📋 Fase 1 · Reconhecimento\n\n"+l.join("\n\n");
+}
 function sendGHL(status){
-  try{ fetch("/api/ghl",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({fase:FASE,status,nome:ans.nome||"",email:(ans.email||"").trim(),whatsapp:ans.whatsapp||""})}); }catch(e){}
+  try{
+    const p={fase:FASE,status,nome:ans.nome||"",email:(ans.email||"").trim(),whatsapp:ans.whatsapp||""};
+    if(status==="concluido") p.nota=buildNotaGHL();
+    fetch("/api/ghl",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+  }catch(e){}
 }
 function sendSupabase(step,status){
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;

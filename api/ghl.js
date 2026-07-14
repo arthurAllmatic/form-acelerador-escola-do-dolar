@@ -166,6 +166,21 @@ export default async function handler(req, res){
       }
     }
 
+    // cria UMA nota por fase — só no concluído, com perguntas+respostas, sem duplicar
+    if (status === "concluido" && body.nota){
+      const primeira = norm((body.nota.split("\n")[0] || "")); // 1a linha = "📋 Fase X · ..."
+      const ex = await api(`/contacts/${contact.id}/notes`);
+      const notes = (ex.json && ex.json.notes) || [];
+      const jaTem = primeira && notes.some(nt => norm((nt.body || "").split("\n")[0]) === primeira);
+      if (jaTem){
+        result.nota = "ja_existia";
+      } else {
+        const nr = await api(`/contacts/${contact.id}/notes`, { method:"POST", body: JSON.stringify({ body: body.nota }) });
+        result.nota = nr.ok;
+        if (!nr.ok) result.notaErr = nr.json;
+      }
+    }
+
     return res.status(200).json({ ok:true, ...result });
   } catch(e){
     return res.status(200).json({ ok:false, error:String(e) });
