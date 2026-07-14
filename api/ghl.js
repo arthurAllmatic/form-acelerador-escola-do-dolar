@@ -13,7 +13,7 @@
 const BASE = "https://services.leadconnectorhq.com";
 const VERSION = "2021-07-28";
 const PIPELINE_NAME = process.env.GHL_PIPELINE_NAME || "3 - Onboarding Acelerador";
-const ASSIGNEE_NAME = process.env.GHL_ASSIGNEE_NAME || "Angelica";
+const ASSIGNEE_NAME = process.env.GHL_ASSIGNEE_NAME || "Ritiele";
 
 // (fase, status) -> etapa alvo + tarefa
 const ACTIONS = {
@@ -153,7 +153,9 @@ export default async function handler(req, res){
     const opp = await findOpportunity(loc, contact.id, cfg.pipeline.id);
     const sid = stageId(cfg.stages, action.stage);
     if (opp && sid){
-      const up = await api(`/opportunities/${opp.id}`, { method:"PUT", body: JSON.stringify({ pipelineId: cfg.pipeline.id, pipelineStageId: sid }) });
+      const oppBody = { pipelineId: cfg.pipeline.id, pipelineStageId: sid };
+      if (cfg.assignee) oppBody.assignedTo = cfg.assignee.id; // oportunidade também vai pra atendente
+      const up = await api(`/opportunities/${opp.id}`, { method:"PUT", body: JSON.stringify(oppBody) });
       result.moved = up.ok; result.oppId = opp.id;
       if (!up.ok) result.moveErr = up.json;
     } else {
