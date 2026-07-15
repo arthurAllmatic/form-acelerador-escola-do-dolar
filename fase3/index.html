@@ -171,15 +171,19 @@ function sendGHL(status){
 }
 function reportar(status,step,extras){
   const p=buildPayload(status,step,extras);
-  const body=JSON.stringify(p);
+  // webhook recebe o payload completo (com ddi)
   try{ fetch(WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
-    headers:{"Content-Type":"text/plain;charset=UTF-8"},body}); }catch(e){}
+    headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(p)}); }catch(e){}
   sendGHL(status);
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
+  // Supabase: só as colunas que existem na tabela (sem ddi, que não é coluna)
+  const row={id:p.id,fase:p.fase,formulario:p.formulario,status:p.status,step:p.step,
+    nome:p.nome,email:p.email,whatsapp:p.whatsapp,respostas:p.respostas,atualizado_em:p.atualizado_em};
   try{
     fetch(SUPABASE_URL+"/rest/v1/leads?on_conflict=id",{method:"POST",keepalive:true,
       headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
-      "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body});
+      "Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
+      body:JSON.stringify(row)});
   }catch(e){}
 }
 
