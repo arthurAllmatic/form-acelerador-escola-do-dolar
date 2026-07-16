@@ -116,6 +116,46 @@
   .regen:disabled{opacity:.6;cursor:default}
   .regenmsg{display:block;margin-top:8px;font:500 12.5px Inter;color:var(--muted)}
   .regenmsg.ok{color:var(--green)} .regenmsg.err{color:#b3261e}
+
+  /* Estúdio da logo */
+  .rit.estudio{background:#fdfbf6;border-color:var(--gold-line)}
+  .chatbox{margin:10px 0 0;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto}
+  .chatvazio{font:500 13px Inter;color:var(--muted);padding:6px 0}
+  .msg{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:10px 12px}
+  .msg .msgn{flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold-soft);
+    border:1px solid var(--gold-line);color:var(--gold-deep);font:700 11px Inter;
+    display:flex;align-items:center;justify-content:center}
+  .msg p{font:500 13.5px/1.45 Inter;color:var(--ink);margin:0}
+  .msg small{font:500 11px Inter;color:#b3b0ba}
+  .msg>div{flex:1}
+  .msgdel{flex:none;background:none;border:none;color:#c9c5cf;font:700 16px Inter;cursor:pointer;line-height:1;padding:0 2px}
+  .msgdel:hover{color:#b3261e}
+  .chatnew{display:flex;gap:8px;margin-top:10px;align-items:flex-start}
+  .chatinput{flex:1;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;
+    font:500 13.5px/1.4 Inter;color:var(--ink);outline:none;resize:vertical}
+  .chatinput:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .chatadd{flex:none;font:700 12.5px Inter;color:var(--gold-deep);border:1.5px solid var(--gold-line);
+    background:var(--gold-soft);border-radius:20px;padding:10px 14px;cursor:pointer;transition:.16s}
+  .chatadd:hover{border-color:var(--gold)}
+  .campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+  .fl{display:flex;flex-direction:column;gap:4px}
+  .fl b{font:600 10.5px Inter;letter-spacing:1.2px;text-transform:uppercase;color:#a09a8a}
+  .fed{border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:8px 10px;
+    font:500 13.5px Inter;color:var(--ink);outline:none;transition:.16s;width:100%;resize:vertical}
+  .fed:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .fed.salvo{border-color:var(--green);background:var(--green-soft)}
+  .fed.erro{border-color:#b3261e}
+  .estudioacoes{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .estudioacoes .regenmsg{margin-top:0}
+  .histbox{margin-top:14px;border-top:1px dashed var(--gold-line);padding-top:10px}
+  .histbox summary{font:600 12.5px Inter;color:var(--gold-deep);cursor:pointer}
+  .histlist{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+  .histit{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+  .histit img{width:64px;height:64px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;flex:none}
+  .histit b{font:600 13px Inter} .histit small{font:500 11px Inter;color:#b3b0ba;margin-left:6px}
+  .hajus{font:500 12px/1.4 Inter;color:var(--muted);margin:4px 0 4px}
+  .histit a{font:600 12px Inter;color:var(--gold-deep)}
   .lid{font:500 10.5px "SF Mono",Menlo,monospace;color:#c4c0cb;margin-top:14px;word-break:break-all}
 
   .empty{padding:56px 20px;text-align:center}
@@ -314,11 +354,47 @@ function respHTML(l){
       <span>${esc(r.logo_erro)}</span>
       ${r.logo_erro_em?`<small class="errdata">${new Date(r.logo_erro_em).toLocaleString("pt-BR")}</small>`:""}</div>`;
   }
-  // Botão de forçar geração — só na Fase 2 (briefing) de quem pediu logo pra equipe
+  // Estúdio da logo — só na Fase 2 (briefing) de quem pediu logo pra equipe
   if(l.formulario==="briefing_logo" && r.tem_logo!=="Já tenho a minha"){
-    regerar=`<div class="rit" style="grid-column:1/-1"><b>Gerar logo</b>
-      <button class="regen" data-lead="${esc(l.id)}">${r.logo_gerada_url?"↻ Gerar logo de novo":"✨ Gerar logo agora"}</button>
-      <span class="regenmsg" id="rg-${esc(l.id)}"></span></div>`;
+    const chat=Array.isArray(r.logo_chat)?r.logo_chat:[];
+    const msgs=chat.length
+      ? chat.map((m,i)=>`<div class="msg"><span class="msgn">${i+1}</span><div><p>${esc(m.texto)}</p>
+          <small>${m.em?new Date(m.em).toLocaleString("pt-BR"):""}</small></div>
+          <button class="msgdel" data-lead="${esc(l.id)}" data-i="${i}" title="Remover ajuste">×</button></div>`).join("")
+      : `<p class="chatvazio">Nenhum ajuste pedido ainda. Escreva abaixo o que o aluno quer mudar.</p>`;
+
+    const campo=(k,label,tipo)=>{
+      const v=Array.isArray(r[k])?r[k].join(", "):(r[k]||"");
+      return tipo==="area"
+        ? `<label class="fl"><b>${label}</b><textarea class="fed" data-lead="${esc(l.id)}" data-k="${k}" rows="2">${esc(v)}</textarea></label>`
+        : `<label class="fl"><b>${label}</b><input class="fed" data-lead="${esc(l.id)}" data-k="${k}" value="${esc(v)}"></label>`;
+    };
+
+    const hist=Array.isArray(r.logo_historico)?r.logo_historico:[];
+    const histHtml=hist.length>1
+      ? `<details class="histbox"><summary>Histórico de gerações (${hist.length})</summary>
+          <div class="histlist">${hist.slice().reverse().map((h,i)=>`
+            <div class="histit">
+              <img src="${esc(h.url)}" alt="v${hist.length-i}">
+              <div><b>v${hist.length-i}</b> <small>${h.em?new Date(h.em).toLocaleString("pt-BR"):""}</small>
+                ${h.ajustes&&h.ajustes.length?`<p class="hajus">Ajustes: ${esc(h.ajustes.join(" · "))}</p>`:`<p class="hajus">Sem ajustes (1ª versão)</p>`}
+                <a href="${esc(h.url)}" target="_blank" rel="noopener">abrir ↗</a></div>
+            </div>`).join("")}</div></details>`
+      : "";
+
+    regerar=`<div class="rit estudio" style="grid-column:1/-1">
+      <b>🎨 Estúdio da logo</b>
+      <div class="chatbox">${msgs}</div>
+      <div class="chatnew">
+        <textarea class="chatinput" id="ci-${esc(l.id)}" rows="2" placeholder="O que o aluno pediu pra mudar? Ex: tirar a folha, deixar mais minimalista, fonte mais grossa…"></textarea>
+        <button class="chatadd" data-lead="${esc(l.id)}">+ Adicionar ajuste</button>
+      </div>
+      <div class="campos">${campo("nome_loja","Nome da loja")}${campo("estilo","Estilo")}${campo("cor_logo","Cor da logo")}${campo("cor_loja","Cores da loja")}${campo("sensacao","Sensação")}${campo("conta_mais","Conta mais","area")}</div>
+      <div class="estudioacoes">
+        <button class="regen" data-lead="${esc(l.id)}">${r.logo_gerada_url?"↻ Gerar logo de novo":"✨ Gerar logo agora"}</button>
+        <span class="regenmsg" id="rg-${esc(l.id)}"></span>
+      </div>
+      ${histHtml}</div>`;
   }
   if(r.logo_base64){
     const src=String(r.logo_base64).startsWith("data:")?r.logo_base64:
@@ -333,7 +409,9 @@ function respHTML(l){
       <img class="logoprev" src="${String(src).replace(/"/g,'&quot;')}" alt="logo gerada">
       ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url+buster)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
   }
-  const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url","logo_erro","logo_erro_em"];
+  const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url","logo_erro","logo_erro_em","logo_chat","logo_historico"];
+  // Quando o estúdio está na tela, esses campos já aparecem editáveis lá — não repete embaixo
+  if(regerar) OCULTOS.push("nome_loja","estilo","cor_logo","cor_loja","sensacao","conta_mais");
   const itens=Object.entries(r)
     .filter(([k,v])=>!OCULTOS.includes(k)&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
     .map(([k,v])=>{
@@ -398,6 +476,65 @@ function drawList(){
   $("list").querySelectorAll(".regen").forEach(b=>{
     b.onclick=e=>{ e.stopPropagation(); gerarLogo(b.dataset.lead, b); };
   });
+  // Estúdio: adicionar ajuste, remover ajuste, salvar campo editado
+  $("list").querySelectorAll(".chatadd").forEach(b=>{
+    b.onclick=e=>{ e.stopPropagation(); addAjuste(b.dataset.lead, b); };
+  });
+  $("list").querySelectorAll(".msgdel").forEach(b=>{
+    b.onclick=e=>{ e.stopPropagation(); delAjuste(b.dataset.lead, +b.dataset.i); };
+  });
+  $("list").querySelectorAll(".fed").forEach(f=>{
+    f.onclick=e=>e.stopPropagation();
+    f.onchange=()=>salvarCampo(f.dataset.lead, f.dataset.k, f.value, f);
+  });
+  $("list").querySelectorAll(".chatinput, .chatbox, .estudio, .histbox").forEach(el=>{
+    el.onclick=e=>e.stopPropagation(); // não fecha o lead ao interagir
+  });
+}
+
+/* ===== Estúdio da logo: chat de ajustes + campos editáveis ===== */
+async function patchRespostas(leadId, mut){
+  const lead=leads.find(x=>x.id===leadId);
+  if(!lead) return false;
+  const novas=mut({...(lead.respostas||{})});
+  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?id=eq."+encodeURIComponent(leadId),{
+    method:"PATCH",
+    headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
+      "Content-Type":"application/json",Prefer:"return=minimal"},
+    body:JSON.stringify({respostas:novas})});
+  if(r.ok) lead.respostas=novas;
+  return r.ok;
+}
+
+async function addAjuste(leadId, btn){
+  const ta=document.getElementById("ci-"+leadId);
+  const txt=(ta.value||"").trim();
+  if(!txt) return;
+  btn.disabled=true; const antes=btn.textContent; btn.textContent="Salvando…";
+  const ok=await patchRespostas(leadId, r=>{
+    const chat=Array.isArray(r.logo_chat)?r.logo_chat.slice():[];
+    chat.push({texto:txt, em:new Date().toISOString()});
+    return {...r, logo_chat:chat};
+  });
+  btn.disabled=false; btn.textContent=antes;
+  if(ok){ ta.value=""; draw(); } else alert("Não consegui salvar o ajuste.");
+}
+
+async function delAjuste(leadId, i){
+  await patchRespostas(leadId, r=>{
+    const chat=(Array.isArray(r.logo_chat)?r.logo_chat.slice():[]);
+    chat.splice(i,1);
+    return {...r, logo_chat:chat};
+  });
+  draw();
+}
+
+async function salvarCampo(leadId, k, valor, el){
+  const v=k==="sensacao" ? valor.split(",").map(s=>s.trim()).filter(Boolean) : valor;
+  const ok=await patchRespostas(leadId, r=>({...r, [k]:v}));
+  el.classList.toggle("salvo", ok);
+  el.classList.toggle("erro", !ok);
+  setTimeout(()=>el.classList.remove("salvo","erro"), 1500);
 }
 
 /* Força a geração da logo de um lead (botão no painel, na Fase 2) */

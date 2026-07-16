@@ -21,18 +21,25 @@ module.exports = async (req, res) => {
 
     // Se já tem logo gerada, não gera de novo (a não ser com force:true)
     const atual = await lerLead(lead_id);
-    if (!force && atual && atual.respostas && atual.respostas.logo_gerada_url) {
-      return res.status(200).json({ ok: true, ja_existia: true, url: atual.respostas.logo_gerada_url });
+    const base = (atual && atual.respostas) || {};
+    if (!force && base.logo_gerada_url) {
+      return res.status(200).json({ ok: true, ja_existia: true, url: base.logo_gerada_url });
     }
 
-    // Nicho vem do lead de origem (reconhecimento), por id ou por e-mail
-    const nicho = await buscarNicho(lead_id_origem, email);
+    // O briefing do banco manda (pode ter sido editado no painel); o body só completa
+    const dados = { ...respostas, ...base };
+    // Ajustes pedidos no chat do painel entram no prompt
+    const ajustes = (Array.isArray(base.logo_chat) ? base.logo_chat : [])
+      .map(m => (m && m.texto ? String(m.texto).trim() : "")).filter(Boolean);
 
-    const prompt = montarPrompt(respostas, nicho);
+    // Nicho vem do lead de origem (reconhecimento), por id ou por e-mail
+    const nicho = await buscarNicho(lead_id_origem || base.lead_id_origem, email);
+
+    const prompt = montarPrompt(dados, nicho, ajustes);
     const pngBase64 = await gerarImagem(prompt, "gpt-image-1");
 
-    // Sobe no bucket público "logos" do Supabase Storage
-    const path = encodeURIComponent(lead_id) + ".png";
+    // Sobe no bucket público "logos" — nome versionado pra preservar o histórico
+    const path = `${encodeURIComponent(lead_id)}-${Date.now()}.png`;
     const up = await fetch(`${SUPABASE_URL}/storage/v1/object/logos/${path}`, {
       method: "POST",
       headers: { ...SB_HEADERS, "Content-Type": "image/png", "x-upsert": "true" },
@@ -42,8 +49,11 @@ module.exports = async (req, res) => {
     const url = `${SUPABASE_URL}/storage/v1/object/public/logos/${path}`;
 
     // Grava o link no lead (merge das respostas pra não perder nada)
-    const base = (atual && atual.respostas) || respostas || {};
-    const novas = { ...respostas, ...base, logo_prompt: prompt, logo_gerada_url: url, logo_gerada_em: new Date().toISOString() };
+    const agora = new Date().toISOString();
+    // Histórico: guarda cada geração (url + prompt + ajustes usados). Mantém as 10 últimas.
+    const hist = (Array.isArray(base.logo_historico) ? base.logo_historico : []).slice(-9);
+    hist.push({ url, prompt, em: agora, ajustes });
+    const novas = { ...dados, logo_prompt: prompt, logo_gerada_url: url, logo_gerada_em: agora, logo_historico: hist };
     delete novas.logo_erro; delete novas.logo_erro_em; // deu certo: limpa erro anterior
     const patch = await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${encodeURIComponent(lead_id)}`, {
       method: "PATCH",
@@ -99,7 +109,7 @@ async function buscarNicho(origemId, email) {
   return String(nicho).replace(/^[^\wÀ-ÿ]+/u, "").trim(); // tira o emoji
 }
 
-function montarPrompt(r, nicho) {
+function montarPrompt(r, nicho, ajustes) {
   const loja = (r.nome_loja || "").trim() || "a loja";
   const p = [`Crie uma logo profissional para a loja online "${loja}"`];
   if (nicho) p[0] += `, do nicho de ${nicho.toLowerCase()}`;
@@ -108,6 +118,10 @@ function montarPrompt(r, nicho) {
   if (r.cor_logo) p.push(`Cores da logo: ${String(r.cor_logo).trim()} — use SOMENTE essas cores nos elementos da logo.`);
   if (Array.isArray(r.sensacao) && r.sensacao.length) p.push(`A marca deve transmitir ${r.sensacao.join(" e ").toLowerCase()}.`);
   if ((r.conta_mais || "").trim()) p.push(`Observações do cliente: ${String(r.conta_mais).trim()}.`);
+  // Ajustes pedidos pelo aluno (chat do painel) — os mais recentes têm prioridade
+  if (Array.isArray(ajustes) && ajustes.length) {
+    p.push(`AJUSTES PEDIDOS PELO CLIENTE (siga todos; em caso de conflito, o último vale): ${ajustes.map((a, i) => `(${i + 1}) ${a}`).join(" ")}.`);
+  }
   p.push(`Requisitos: o nome "${loja}" bem legível como elemento principal com um símbolo simples acima ou ao lado, estilo vetorial flat com traços nítidos e bem definidos, alto contraste, design limpo e memorável, fundo 100% transparente (sem cor de fundo, sem gradiente de fundo), sem slogan e sem textos extras, adequado para um e-commerce premium de saúde e bem-estar voltado ao público europeu.`);
   return p.join(" ");
 }
