@@ -97,10 +97,11 @@ function montarPrompt(r, nicho) {
   return p.join(" ");
 }
 
-async function gerarImagem(prompt, model) {
+async function gerarImagem(prompt, model, erroAnterior) {
+  // Sem response_format: gpt-image-1 já devolve b64_json e o dall-e-3 devolve url
+  // (tratada logo abaixo). Passar response_format faz a API rejeitar a chamada.
   const body = { model, prompt, n: 1, size: "1024x1024" };
   if (model === "gpt-image-1") { body.background = "transparent"; body.quality = "high"; }
-  else body.response_format = "b64_json";
   const r = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
@@ -108,9 +109,10 @@ async function gerarImagem(prompt, model) {
   });
   const j = await r.json();
   if (!r.ok) {
+    const msg = (j.error && j.error.message) || ("OpenAI HTTP " + r.status);
     // gpt-image-1 pode exigir verificação da org — cai pro dall-e-3
-    if (model === "gpt-image-1") return gerarImagem(prompt, "dall-e-3");
-    throw new Error((j.error && j.error.message) || "OpenAI HTTP " + r.status);
+    if (model === "gpt-image-1") return gerarImagem(prompt, "dall-e-3", msg);
+    throw new Error(`dall-e-3: ${msg}` + (erroAnterior ? ` | gpt-image-1: ${erroAnterior}` : ""));
   }
   const d = j.data && j.data[0];
   if (d && d.b64_json) return d.b64_json;
