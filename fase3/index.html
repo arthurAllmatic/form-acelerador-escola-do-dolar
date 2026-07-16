@@ -102,6 +102,10 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 /* Builder por produto+país (planilha): .../lp/{produto}-{pais} */
 const BUILDER_BASE="https://escoladodolar-edd.prostore.ai/lp";
+/* Padrões: todo lead tem que receber um builder. Se ele escolheu "confio na equipe"
+   (sem nicho) ou não informou o país, a gente define por ele. */
+const PRODUTO_PADRAO={nome:"Shilajit",slug:"shilajit"};
+const PAIS_PADRAO={nome:"🇵🇹 Portugal",code:"pt"};
 const FORM_RECONHECIMENTO="https://lojaexclusiva.escoladodolar.com/";
 const FORM_FASE2="https://lojaexclusiva.escoladodolar.com/fase2/";
 
@@ -147,7 +151,8 @@ function buildPayload(status,step,extras){
     nome:ans.nome||"", email:(ans.email||"").trim(), whatsapp:ans.whatsapp||"", ddi:ans.ddi||"",
     respostas:Object.assign({
       lead_id_origem:perfil.origem||null, pais:perfil.pais||null,
-      produto:perfil.produto?perfil.produto.nome:null, builder_link:perfil.builder||null
+      produto:perfil.produto?perfil.produto.nome:null, builder_link:perfil.builder||null,
+      produto_auto:!!perfil.produto_auto, pais_auto:!!perfil.pais_auto
     },extras||{}),
     atualizado_em:new Date().toISOString()
   };
@@ -251,12 +256,20 @@ async function confirmarEmail(email,btn,box,upd){
   const br=bri.respostas||{};
   perfil.origem=rec.id;
   perfil.nicho=(rec.respostas||{}).nicho||(rec.respostas||{}).categoria||null;
-  perfil.pais=br.pais||null;
-  perfil.produto=nichoProduto(perfil.nicho);
   perfil.nome_loja=br.nome_loja||null;
   perfil.logo_url=br.logo_gerada_url||null;
-  const code=paisCode(perfil.pais);
-  perfil.builder=(perfil.produto&&code)?`${BUILDER_BASE}/${perfil.produto.slug}-${code}`:null;
+  // Produto: do nicho; se não deu (ex: "confio na equipe"), usa o padrão
+  const prodDetectado=nichoProduto(perfil.nicho);
+  perfil.produto=prodDetectado||PRODUTO_PADRAO;
+  perfil.produto_auto=!prodDetectado;
+  // País: do briefing; se não deu, usa o padrão
+  perfil.pais=br.pais||null;
+  const codeDetectado=paisCode(perfil.pais);
+  const code=codeDetectado||PAIS_PADRAO.code;
+  perfil.pais_auto=!codeDetectado;
+  if(!perfil.pais) perfil.pais=PAIS_PADRAO.nome;
+  // Todo lead recebe um builder
+  perfil.builder=`${BUILDER_BASE}/${perfil.produto.slug}-${code}`;
 
   checking=false;
   reportar("novo_lead",0,{logo_baixada:false});
