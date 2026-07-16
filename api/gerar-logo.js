@@ -44,6 +44,7 @@ module.exports = async (req, res) => {
     // Grava o link no lead (merge das respostas pra não perder nada)
     const base = (atual && atual.respostas) || respostas || {};
     const novas = { ...respostas, ...base, logo_prompt: prompt, logo_gerada_url: url, logo_gerada_em: new Date().toISOString() };
+    delete novas.logo_erro; delete novas.logo_erro_em; // deu certo: limpa erro anterior
     const patch = await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${encodeURIComponent(lead_id)}`, {
       method: "PATCH",
       headers: { ...SB_HEADERS, "Content-Type": "application/json", Prefer: "return=minimal" },
@@ -53,7 +54,21 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({ ok: true, url });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    const msg = String((e && e.message) || e);
+    // Grava o erro no lead pra aparecer no painel (sem derrubar a resposta)
+    try {
+      const lid = (req.body && (typeof req.body === "string" ? JSON.parse(req.body) : req.body).lead_id) || null;
+      if (lid) {
+        const at = await lerLead(lid);
+        const rr = (at && at.respostas) || {};
+        await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${encodeURIComponent(lid)}`, {
+          method: "PATCH",
+          headers: { ...SB_HEADERS, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify({ respostas: { ...rr, logo_erro: msg.slice(0, 300), logo_erro_em: new Date().toISOString() } }),
+        });
+      }
+    } catch (_) {}
+    return res.status(500).json({ error: msg });
   }
 };
 

@@ -106,6 +106,16 @@
     border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:20px;
     padding:8px 16px;text-decoration:none;transition:.16s}
   .verlogo:hover{border-color:var(--gold)}
+  .rit.alertaerr{border-color:#f0c2bd;background:#fdf1f0}
+  .rit.alertaerr b{color:#b3261e}
+  .rit.alertaerr span{color:#7a2018;font:500 13.5px/1.5 Inter}
+  .errdata{display:block;margin-top:6px;font:500 11.5px Inter;color:#b08681}
+  .regen{margin-top:4px;font:700 13px Inter;color:var(--gold-deep);border:1.5px solid var(--gold-line);
+    background:var(--gold-soft);border-radius:20px;padding:9px 16px;cursor:pointer;transition:.16s}
+  .regen:hover{border-color:var(--gold)}
+  .regen:disabled{opacity:.6;cursor:default}
+  .regenmsg{display:block;margin-top:8px;font:500 12.5px Inter;color:var(--muted)}
+  .regenmsg.ok{color:var(--green)} .regenmsg.err{color:#b3261e}
   .lid{font:500 10.5px "SF Mono",Menlo,monospace;color:#c4c0cb;margin-top:14px;word-break:break-all}
 
   .empty{padding:56px 20px;text-align:center}
@@ -296,7 +306,20 @@ function drawCards(){
 
 function respHTML(l){
   const r=l.respostas||{};
-  let logo="", gerada="";
+  let logo="", gerada="", alerta="", regerar="";
+
+  // Alerta de erro na geração da logo (só aparece quando falhou)
+  if(r.logo_erro){
+    alerta=`<div class="rit alertaerr" style="grid-column:1/-1"><b>⚠️ Erro ao gerar a logo</b>
+      <span>${esc(r.logo_erro)}</span>
+      ${r.logo_erro_em?`<small class="errdata">${new Date(r.logo_erro_em).toLocaleString("pt-BR")}</small>`:""}</div>`;
+  }
+  // Botão de forçar geração — só na Fase 2 (briefing) de quem pediu logo pra equipe
+  if(l.formulario==="briefing_logo" && r.tem_logo!=="Já tenho a minha"){
+    regerar=`<div class="rit" style="grid-column:1/-1"><b>Gerar logo</b>
+      <button class="regen" data-lead="${esc(l.id)}">${r.logo_gerada_url?"↻ Gerar logo de novo":"✨ Gerar logo agora"}</button>
+      <span class="regenmsg" id="rg-${esc(l.id)}"></span></div>`;
+  }
   if(r.logo_base64){
     const src=String(r.logo_base64).startsWith("data:")?r.logo_base64:
       "data:"+(r.logo_mime||"image/png")+";base64,"+r.logo_base64;
@@ -310,15 +333,15 @@ function respHTML(l){
       <img class="logoprev" src="${String(src).replace(/"/g,'&quot;')}" alt="logo gerada">
       ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url+buster)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
   }
-  const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url"];
+  const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url","logo_erro","logo_erro_em"];
   const itens=Object.entries(r)
     .filter(([k,v])=>!OCULTOS.includes(k)&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
     .map(([k,v])=>{
       let txt=Array.isArray(v)?v.join(", "):(typeof v==="boolean"?(v?"Sim":"Não"):String(v));
       return `<div class="rit"${k==="logo_prompt"?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b><span>${esc(txt)}</span></div>`;
     }).join("");
-  if(!itens&&!logo&&!gerada) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
-  return `<div class="resp">${gerada}${logo}${itens}</div>`;
+  if(!itens&&!logo&&!gerada&&!alerta&&!regerar) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
+  return `<div class="resp">${alerta}${gerada}${logo}${regerar}${itens}</div>`;
 }
 
 function drawList(){
@@ -372,6 +395,38 @@ function drawList(){
       m.parentElement.classList.toggle("open");
     };
   });
+  $("list").querySelectorAll(".regen").forEach(b=>{
+    b.onclick=e=>{ e.stopPropagation(); gerarLogo(b.dataset.lead, b); };
+  });
+}
+
+/* Força a geração da logo de um lead (botão no painel, na Fase 2) */
+async function gerarLogo(leadId, btn){
+  const lead=leads.find(x=>x.id===leadId);
+  if(!lead) return;
+  const r=lead.respostas||{};
+  const msg=document.getElementById("rg-"+leadId);
+  const antes=btn.textContent;
+  btn.disabled=true; btn.textContent="Gerando… (até 1 min)";
+  if(msg){ msg.className="regenmsg"; msg.textContent="Chamando a IA, aguarda…"; }
+  try{
+    const resp=await fetch("/api/gerar-logo",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({lead_id:leadId,force:true,email:lead.email||"",
+        lead_id_origem:r.lead_id_origem||null,
+        respostas:{nome_loja:r.nome_loja,estilo:r.estilo,cor_loja:r.cor_loja,cor_logo:r.cor_logo,
+          conta_mais:r.conta_mais,sensacao:r.sensacao}})});
+    const j=await resp.json();
+    if(j.ok){
+      if(msg){ msg.className="regenmsg ok"; msg.textContent="✓ Logo gerada! Atualizando…"; }
+      await load(true);
+    } else {
+      if(msg){ msg.className="regenmsg err"; msg.textContent="Falhou: "+(j.error||"erro desconhecido"); }
+      btn.disabled=false; btn.textContent=antes;
+    }
+  }catch(e){
+    if(msg){ msg.className="regenmsg err"; msg.textContent="Falhou: "+e.message; }
+    btn.disabled=false; btn.textContent=antes;
+  }
 }
 
 function draw(){drawCards();drawList();}
