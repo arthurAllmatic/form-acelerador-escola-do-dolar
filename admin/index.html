@@ -100,6 +100,15 @@
   .rit{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 14px}
   .rit b{display:block;font:600 10.5px Inter;letter-spacing:1.2px;text-transform:uppercase;color:#a09a8a;margin-bottom:4px}
   .rit span{font:500 14px/1.45 Inter;color:var(--ink);word-break:break-word;white-space:pre-wrap}
+  /* Campo de resposta editável — parece texto, vira input ao focar */
+  .ed{width:100%;font:500 14px/1.45 Inter;color:var(--ink);background:transparent;
+    border:1px solid transparent;border-radius:8px;padding:5px 8px;margin:-5px -8px;
+    outline:none;transition:.14s;resize:vertical;font-family:Inter}
+  .ed:hover{border-color:var(--line);background:#fff}
+  .ed:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px var(--gold-soft)}
+  .ed.salvo{border-color:var(--green);background:var(--green-soft)}
+  .ed.erro{border-color:#b3261e;background:#fdf1f0}
+  textarea.ed{white-space:pre-wrap}
   .logoprev{max-width:180px;max-height:120px;object-fit:contain;border:1.5px solid var(--line);
     border-radius:12px;background:#fff;padding:8px;display:block}
   .verlogo{display:inline-block;margin-top:10px;font:700 13px Inter;color:var(--gold-deep);
@@ -413,11 +422,18 @@ function respHTML(l){
   const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url","logo_erro","logo_erro_em","logo_chat","logo_historico"];
   // Quando o estúdio está na tela, esses campos já aparecem editáveis lá — não repete embaixo
   if(regerar) OCULTOS.push("nome_loja","estilo","cor_logo","cor_loja","sensacao","conta_mais");
+  // Todo campo de resposta é editável (salva no registro daquela fase)
   const itens=Object.entries(r)
     .filter(([k,v])=>!OCULTOS.includes(k)&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
     .map(([k,v])=>{
-      let txt=Array.isArray(v)?v.join(", "):(typeof v==="boolean"?(v?"Sim":"Não"):String(v));
-      return `<div class="rit"${k==="logo_prompt"?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b><span>${esc(txt)}</span></div>`;
+      const arr=Array.isArray(v), bool=typeof v==="boolean";
+      const txt=arr?v.join(", "):(bool?(v?"Sim":"Não"):String(v));
+      const tipo=arr?"array":(bool?"bool":"str");
+      const largo=k==="logo_prompt"||k==="conta_mais"||k==="builder_link"||String(txt).length>48;
+      const campo=largo
+        ? `<textarea class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" rows="2">${esc(txt)}</textarea>`
+        : `<input class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" value="${esc(txt).replace(/"/g,'&quot;')}">`;
+      return `<div class="rit"${largo?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b>${campo}</div>`;
     }).join("");
   if(!itens&&!logo&&!gerada&&!alerta&&!regerar) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
   return `<div class="resp">${alerta}${gerada}${logo}${regerar}${itens}</div>`;
@@ -488,6 +504,12 @@ function drawList(){
     f.onclick=e=>e.stopPropagation();
     f.onchange=()=>salvarCampo(f.dataset.lead, f.dataset.k, f.value, f);
   });
+  // Qualquer campo de resposta editável (qualquer fase)
+  $("list").querySelectorAll(".ed").forEach(f=>{
+    f.onclick=e=>e.stopPropagation();
+    f.onkeydown=e=>{ if(e.key==="Enter"&&f.tagName==="INPUT"){e.preventDefault();f.blur();} };
+    f.onchange=()=>salvarResposta(f.dataset.lead, f.dataset.k, f.value, f.dataset.t, f);
+  });
   $("list").querySelectorAll(".chatinput, .chatbox, .estudio, .histbox").forEach(el=>{
     el.onclick=e=>e.stopPropagation(); // não fecha o lead ao interagir
   });
@@ -532,6 +554,17 @@ async function delAjuste(leadId, i){
 
 async function salvarCampo(leadId, k, valor, el){
   const v=k==="sensacao" ? valor.split(",").map(s=>s.trim()).filter(Boolean) : valor;
+  const ok=await patchRespostas(leadId, r=>({...r, [k]:v}));
+  el.classList.toggle("salvo", ok);
+  el.classList.toggle("erro", !ok);
+  setTimeout(()=>el.classList.remove("salvo","erro"), 1500);
+}
+
+// Salva qualquer campo de resposta (qualquer fase), preservando o tipo
+async function salvarResposta(leadId, k, valor, tipo, el){
+  let v=valor;
+  if(tipo==="array") v=valor.split(",").map(s=>s.trim()).filter(Boolean);
+  else if(tipo==="bool") v=/^(sim|true|1|yes)$/i.test(valor.trim());
   const ok=await patchRespostas(leadId, r=>({...r, [k]:v}));
   el.classList.toggle("salvo", ok);
   el.classList.toggle("erro", !ok);
