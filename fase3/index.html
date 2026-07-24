@@ -284,6 +284,11 @@ async function confirmarEmail(email,btn,box,upd){
   // Todo lead recebe um builder
   perfil.builder=`${BUILDER_BASE}/${perfil.produto.slug}-${code}`;
 
+  // ID estável por lead: um único registro entrega_logo por pessoa (reabrir faz
+  // upsert no mesmo, não cria duplicado). Assim editar país/produto no painel vale.
+  if(perfil.origem) ans._id="entrega-"+perfil.origem;
+  else if(ans.email) ans._id="entrega-"+ans.email.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+
   checking=false;
   reportar("novo_lead",0,{logo_baixada:false});
   renderEntrega();
