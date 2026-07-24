@@ -109,6 +109,19 @@
   .ed.salvo{border-color:var(--green);background:var(--green-soft)}
   .ed.erro{border-color:#b3261e;background:#fdf1f0}
   textarea.ed{white-space:pre-wrap}
+  /* Dropdown de múltipla escolha */
+  select.edsel{border:1.5px solid var(--line);background:#fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a6a2c' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center;
+    -webkit-appearance:none;appearance:none;padding-right:26px;margin:0;cursor:pointer}
+  select.edsel:hover{border-color:var(--gold-line)}
+  /* Checkboxes de múltipla escolha */
+  .edchk{display:flex;flex-wrap:wrap;gap:7px;border:1px solid transparent;border-radius:10px;padding:4px;margin:-4px;transition:.14s}
+  .edchk.salvo{border-color:var(--green);background:var(--green-soft)}
+  .edchk.erro{border-color:#b3261e}
+  .chk{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);border-radius:20px;
+    padding:6px 12px;font:500 13px Inter;color:var(--ink);cursor:pointer;background:#fff;transition:.14s;user-select:none}
+  .chk:hover{border-color:var(--gold-line)}
+  .chk input{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;margin:0}
+  .chk:has(input:checked){border-color:var(--gold);background:var(--gold-soft);color:var(--gold-deep);font-weight:600}
   .logoprev{max-width:180px;max-height:120px;object-fit:contain;border:1.5px solid var(--line);
     border-radius:12px;background:#fff;padding:8px;display:block}
   .verlogo{display:inline-block;margin-top:10px;font:700 13px Inter;color:var(--gold-deep);
@@ -245,6 +258,26 @@ const RESP_LABELS={
   banner:"Banner aplicado",banner_fallback:"Banner (fallback)",logo:"Logo aplicada",cores:"Cores aplicadas",
   builder_link:"Link do builder",logo_baixada:"Baixou a logo",resgatou:"Resgatou a loja",
   produto_auto:"Produto escolhido pela equipe",pais_auto:"País assumido (padrão)"
+};
+
+// Campos de múltipla escolha -> dropdown/checkboxes com as opções dos forms (não deixa digitar).
+// tipo: "single" (dropdown) ou "multi" (checkboxes). Chaves batem com o que é salvo no respostas.
+const OPCOES={
+  nicho:{tipo:"single",op:["🧬 Longevidade","⚡ Vitalidade","🧔 Saúde Masculina","Escolha pra mim — confio na equipe"]},
+  ja_vendeu:{tipo:"single",op:["Sim, já vendo","Já tive e parei","Nunca vendi na Shopify"]},
+  horas_por_semana:{tipo:"single",op:["Menos de 1h","1 a 2h","3 a 4h","5h ou mais"]},
+  motivo:{tipo:"multi",op:["Não sei por onde começar","Já tentei sozinho(a) e não deu certo","Quero economizar tempo","Falta de confiança pra montar sozinho(a)","Pra ficar mais profissional","Acredito que terei mais resultados","Confio na metodologia do Acelerador","Outro motivo"]},
+  o_que_trava:{tipo:"multi",op:["Não sei por onde começar","Não sei escolher o produto","Medo de não dar certo","A parte técnica","Falta de tempo","Atrair clientes"]},
+  pais:{tipo:"single",op:["🇵🇹 Portugal","🇪🇸 Espanha"]},
+  tem_logo:{tipo:"single",op:["Já tenho a minha","Quero que vocês criem pra mim"]},
+  estilo:{tipo:"single",op:["Elegante","Moderno","Natural","Jovem","Profissional","Minimalista"]},
+  cor_loja:{tipo:"single",op:["🔵🟡 Azul e amarelo","🟣🟢 Roxo e verde","🟠🟣 Laranja e roxo","🔴🟡 Vermelho e amarelo"]},
+  sensacao:{tipo:"multi",op:["Confiança","Acolhimento","Sofisticação","Energia","Autoridade","Exclusividade","Proximidade","Inovação","Resultado"]},
+  produto:{tipo:"single",op:["NAD+","Shilajit","Vigor"]},
+  // campos Sim/Não do sistema
+  resgatou:{tipo:"single",op:["Sim","Não"]}, logo_baixada:{tipo:"single",op:["Sim","Não"]},
+  produto_auto:{tipo:"single",op:["Sim","Não"]}, pais_auto:{tipo:"single",op:["Sim","Não"]},
+  tema_instalado:{tipo:"single",op:["Sim","Não"]}
 };
 
 let leads=[], filtroForm=null, busca="", aberto=new Set(), timer=null;
@@ -422,17 +455,35 @@ function respHTML(l){
   const OCULTOS=["logo_base64","logo_gerada_base64","logo_gerada_url","logo_erro","logo_erro_em","logo_chat","logo_historico"];
   // Quando o estúdio está na tela, esses campos já aparecem editáveis lá — não repete embaixo
   if(regerar) OCULTOS.push("nome_loja","estilo","cor_logo","cor_loja","sensacao","conta_mais");
-  // Todo campo de resposta é editável (salva no registro daquela fase)
+  // Todo campo de resposta é editável (salva no registro daquela fase).
+  // Múltipla escolha vira dropdown/checkboxes; o resto, campo livre.
   const itens=Object.entries(r)
     .filter(([k,v])=>!OCULTOS.includes(k)&&v!==null&&v!==""&&v!==undefined&&!(Array.isArray(v)&&!v.length))
     .map(([k,v])=>{
       const arr=Array.isArray(v), bool=typeof v==="boolean";
-      const txt=arr?v.join(", "):(bool?(v?"Sim":"Não"):String(v));
-      const tipo=arr?"array":(bool?"bool":"str");
-      const largo=k==="logo_prompt"||k==="conta_mais"||k==="builder_link"||String(txt).length>48;
-      const campo=largo
-        ? `<textarea class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" rows="2">${esc(txt)}</textarea>`
-        : `<input class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" value="${esc(txt).replace(/"/g,'&quot;')}">`;
+      const conf=OPCOES[k];
+      let campo, largo=false;
+      if(conf&&conf.tipo==="single"){
+        const atual=bool?(v?"Sim":"Não"):String(v);
+        let ops=conf.op.slice();
+        if(atual&&!ops.includes(atual)) ops=[atual,...ops]; // preserva valor fora da lista
+        campo=`<select class="ed edsel" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${bool?"bool":"str"}">`
+          +ops.map(o=>`<option${o===atual?" selected":""}>${esc(o)}</option>`).join("")+`</select>`;
+      } else if(conf&&conf.tipo==="multi"){
+        const sel=arr?v.map(String):[];
+        let ops=conf.op.slice();
+        sel.forEach(s=>{ if(!ops.includes(s)) ops.push(s); });
+        largo=true;
+        campo=`<div class="edchk" data-lead="${esc(l.id)}" data-k="${esc(k)}">`
+          +ops.map(o=>`<label class="chk"><input type="checkbox" value="${esc(o).replace(/"/g,'&quot;')}"${sel.includes(o)?" checked":""}><span>${esc(o)}</span></label>`).join("")+`</div>`;
+      } else {
+        const txt=arr?v.join(", "):(bool?(v?"Sim":"Não"):String(v));
+        const tipo=arr?"array":(bool?"bool":"str");
+        largo=k==="logo_prompt"||k==="conta_mais"||k==="builder_link"||String(txt).length>48;
+        campo=largo
+          ? `<textarea class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" rows="2">${esc(txt)}</textarea>`
+          : `<input class="ed" data-lead="${esc(l.id)}" data-k="${esc(k)}" data-t="${tipo}" value="${esc(txt).replace(/"/g,'&quot;')}">`;
+      }
       return `<div class="rit"${largo?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b>${campo}</div>`;
     }).join("");
   if(!itens&&!logo&&!gerada&&!alerta&&!regerar) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
@@ -505,10 +556,27 @@ function drawList(){
     f.onchange=()=>salvarCampo(f.dataset.lead, f.dataset.k, f.value, f);
   });
   // Qualquer campo de resposta editável (qualquer fase)
-  $("list").querySelectorAll(".ed").forEach(f=>{
+  $("list").querySelectorAll(".ed:not(.edsel)").forEach(f=>{
     f.onclick=e=>e.stopPropagation();
     f.onkeydown=e=>{ if(e.key==="Enter"&&f.tagName==="INPUT"){e.preventDefault();f.blur();} };
     f.onchange=()=>salvarResposta(f.dataset.lead, f.dataset.k, f.value, f.dataset.t, f);
+  });
+  // Múltipla escolha: dropdown
+  $("list").querySelectorAll(".edsel").forEach(s=>{
+    s.onclick=e=>e.stopPropagation();
+    s.onchange=()=>salvarResposta(s.dataset.lead, s.dataset.k, s.value, s.dataset.t, s);
+  });
+  // Múltipla escolha: checkboxes
+  $("list").querySelectorAll(".edchk").forEach(c=>{
+    c.onclick=e=>e.stopPropagation();
+    c.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+      cb.onchange=async()=>{
+        const vals=[...c.querySelectorAll("input:checked")].map(x=>x.value);
+        const ok=await patchRespostas(c.dataset.lead, r=>({...r,[c.dataset.k]:vals}));
+        c.classList.toggle("salvo",ok); c.classList.toggle("erro",!ok);
+        setTimeout(()=>c.classList.remove("salvo","erro"),1200);
+      };
+    });
   });
   $("list").querySelectorAll(".chatinput, .chatbox, .estudio, .histbox").forEach(el=>{
     el.onclick=e=>e.stopPropagation(); // não fecha o lead ao interagir
