@@ -136,6 +136,14 @@ function nichoProduto(nicho){
   if(n.includes("masculina")) return {nome:"Vigor",slug:"vigor"};
   return null; // "escolha pra mim" / desconhecido — equipe define
 }
+/* nome do produto (override do painel) -> {nome,slug} */
+function produtoPorNome(nome){
+  const n=String(nome||"").toLowerCase();
+  if(n.includes("nad")) return {nome:"NAD+",slug:"nad"};
+  if(n.includes("shilajit")) return {nome:"Shilajit",slug:"shilajit"};
+  if(n.includes("vigor")) return {nome:"Vigor",slug:"vigor"};
+  return null;
+}
 /* país -> código */
 function paisCode(pais){
   const p=String(pais||"").toLowerCase();
@@ -254,16 +262,21 @@ async function confirmarEmail(email,btn,box,upd){
 
   // Tudo certo — monta o perfil
   const br=bri.respostas||{};
+  // Override manual do painel: se a equipe editou país/produto num entrega_logo
+  // anterior, esse valor manda (é o que o admin salva ao editar o card da Fase 3).
+  const ent=maisRecente(rows,"entrega_logo");
+  const ov=(ent&&ent.respostas)||{};
   perfil.origem=rec.id;
   perfil.nicho=(rec.respostas||{}).nicho||(rec.respostas||{}).categoria||null;
   perfil.nome_loja=br.nome_loja||null;
   perfil.logo_url=br.logo_gerada_url||null;
-  // Produto: do nicho; se não deu (ex: "confio na equipe"), usa o padrão
+  // Produto: override do painel (nome) > nicho > padrão
+  const prodOverride=produtoPorNome(ov.produto);
   const prodDetectado=nichoProduto(perfil.nicho);
-  perfil.produto=prodDetectado||PRODUTO_PADRAO;
-  perfil.produto_auto=!prodDetectado;
-  // País: do briefing; se não deu, usa o padrão
-  perfil.pais=br.pais||null;
+  perfil.produto=prodOverride||prodDetectado||PRODUTO_PADRAO;
+  perfil.produto_auto=!prodOverride&&!prodDetectado;
+  // País: override do painel > briefing > padrão
+  perfil.pais=ov.pais||br.pais||null;
   const codeDetectado=paisCode(perfil.pais);
   const code=codeDetectado||PAIS_PADRAO.code;
   perfil.pais_auto=!codeDetectado;
