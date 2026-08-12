@@ -128,6 +128,13 @@
     border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:20px;
     padding:8px 16px;text-decoration:none;transition:.16s}
   .verlogo:hover{border-color:var(--gold)}
+  .rit.loginstala{background:#fbfaf8}
+  .loglist{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:280px;overflow-y:auto}
+  .logrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);
+    border-radius:10px;padding:8px 12px;background:#fff}
+  .logwhen{font:600 12px Inter;color:var(--muted);min-width:132px}
+  .logloja{font:600 12.5px Inter;color:var(--ink)}
+  .logerr{font:500 12px Inter;color:#b3261e;width:100%}
   .rit.alertaerr{border-color:#f0c2bd;background:#fdf1f0}
   .rit.alertaerr b{color:#b3261e}
   .rit.alertaerr span{color:#7a2018;font:500 13.5px/1.5 Inter}
@@ -389,7 +396,27 @@ function drawCards(){
 
 function respHTML(l){
   const r=l.respostas||{};
-  let logo="", gerada="", alerta="", regerar="";
+  let logo="", gerada="", alerta="", regerar="", logInstala="";
+
+  // Log de instalações do tema — TODAS as tentativas da pessoa (não só a última)
+  if(l.formulario==="instalar_tema"){
+    const email=(l.email||"").trim().toLowerCase();
+    const tentativas=leads
+      .filter(x=>x.formulario==="instalar_tema" && (x.email||"").trim().toLowerCase()===email)
+      .sort((a,b)=>new Date(b.atualizado_em||0)-new Date(a.atualizado_em||0));
+    const okN=tentativas.filter(t=>t.status==="concluido").length;
+    const linhas=tentativas.map(t=>{
+      const tr=t.respostas||{};
+      const st=ST[t.status]||{label:t.status||"—",cls:"novo"};
+      const quando=t.atualizado_em?new Date(t.atualizado_em).toLocaleString("pt-BR"):"—";
+      const erro=tr.ultimo_erro?`<span class="logerr">⚠ ${esc(tr.ultimo_erro)}</span>`:"";
+      const loja=tr.loja_shopify?`<span class="logloja">${esc(tr.loja_shopify)}</span>`:`<span class="logloja" style="color:#b3b0ba">(sem loja)</span>`;
+      return `<div class="logrow"><span class="logwhen">${esc(quando)}</span>${loja}<span class="st st-${st.cls}">${esc(st.label)}</span>${erro}</div>`;
+    }).join("");
+    logInstala=`<div class="rit loginstala" style="grid-column:1/-1">
+      <b>📋 Log de instalações — ${tentativas.length} tentativa${tentativas.length===1?"":"s"}, ${okN} com sucesso</b>
+      <div class="loglist">${linhas}</div></div>`;
+  }
 
   // Alerta de erro na geração da logo (só aparece quando falhou)
   if(r.logo_erro){
@@ -486,8 +513,8 @@ function respHTML(l){
       }
       return `<div class="rit"${largo?' style="grid-column:1/-1"':''}><b>${esc(RESP_LABELS[k]||k.replace(/_/g," "))}</b>${campo}</div>`;
     }).join("");
-  if(!itens&&!logo&&!gerada&&!alerta&&!regerar) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
-  return `<div class="resp">${alerta}${gerada}${logo}${regerar}${itens}</div>`;
+  if(!itens&&!logo&&!gerada&&!alerta&&!regerar&&!logInstala) return `<p style="font:500 13.5px Inter;color:var(--muted)">Sem respostas registradas ainda.</p>`;
+  return `<div class="resp">${logInstala}${alerta}${gerada}${logo}${regerar}${itens}</div>`;
 }
 
 function drawList(){
