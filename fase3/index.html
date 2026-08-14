@@ -269,7 +269,14 @@ async function confirmarEmail(email,btn,box,upd){
   perfil.origem=rec.id;
   perfil.nicho=(rec.respostas||{}).nicho||(rec.respostas||{}).categoria||null;
   perfil.nome_loja=br.nome_loja||null;
+  // Logo: a gerada pela IA OU a que o próprio aluno subiu (quem escolheu "já tenho a minha")
   perfil.logo_url=br.logo_gerada_url||null;
+  perfil.logo_propria=false;
+  if(!perfil.logo_url && br.logo_base64){
+    const b=String(br.logo_base64);
+    perfil.logo_url=b.startsWith("data:")?b:("data:"+(br.logo_mime||"image/png")+";base64,"+b);
+    perfil.logo_propria=true;
+  }
   // Produto: override do painel (nome) > nicho > padrão
   const prodOverride=produtoPorNome(ov.produto);
   const prodDetectado=nichoProduto(perfil.nicho);
@@ -332,9 +339,11 @@ function renderEntrega(){
   app.innerHTML=`
     <div class="nav"></div>
     <div class="screen">
-      <div class="okpill">✓ Logo gerada pela equipe</div>
+      <div class="okpill">✓ ${perfil.logo_propria?"Sua logo confirmada":"Logo gerada pela equipe"}</div>
       <h1 class="q">${n?n+", sua":"Sua"} <span class="b ital">logo está pronta</span>.</h1>
-      <div class="sub">Nossa equipe criou a identidade da sua loja${perfil.nome_loja?` <b>${esc(perfil.nome_loja)}</b>`:""}. Baixa ela aqui — você vai usar na sua loja.</div>
+      <div class="sub">${perfil.logo_propria
+        ? `Esta é a logo${perfil.nome_loja?` da sua loja <b>${esc(perfil.nome_loja)}</b>`:""} que você enviou. Baixa ela aqui — você vai usar na sua loja.`
+        : `Nossa equipe criou a identidade da sua loja${perfil.nome_loja?` <b>${esc(perfil.nome_loja)}</b>`:""}. Baixa ela aqui — você vai usar na sua loja.`}</div>
       <div class="body">
         <div class="logocard">
           ${logoBloco}
