@@ -119,6 +119,10 @@
   .thanks h1{font:400 clamp(38px,7.5vw,60px)/1.06 var(--serif);letter-spacing:0;margin:0 0 24px;max-width:680px}
   .thanks p{font:400 clamp(16px,2.4vw,17px)/1.7 Inter;color:#4a4651;max-width:540px;margin:0 auto 32px}
   .thanks .ty-end{font:400 clamp(30px,5.5vw,38px) var(--serif);font-style:italic;display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wa{display:inline-flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;
+    font:700 15px Inter;letter-spacing:.2px;padding:15px 30px;border-radius:34px;cursor:pointer;
+    text-decoration:none;box-shadow:0 10px 24px -12px rgba(37,211,102,.7);transition:.18s;margin:4px auto 22px}
+  .wa:hover{filter:brightness(1.04)}
 </style>
 </head>
 <body>
@@ -131,6 +135,8 @@
 <script>
 const FASE="fase1", FORMULARIO="reconhecimento";
 const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+/* WhatsApp do suporte (só dígitos, com DDI). Se for celular, pode precisar do 9: 5551981708128 */
+const WA_SUPORTE="555181708128";
 
 /* ===== SUPABASE (config única — preencher com as credenciais do projeto) ===== */
 const SUPABASE_URL="https://wiktreeseddzzhbsbwkz.supabase.co";
@@ -433,6 +439,7 @@ function renderFinal(){
       <div class="eyebrow">Perfil concluído</div>
       <h1>Prontinho. Agora a gente <span class="b ital">te conhece</span>.</h1>
       <p>Com isso a equipe já começa a desenhar a sua loja nichada${n?", "+n:""}. Fica de olho no WhatsApp — em breve a gente te chama pra <b>Fase 2</b>, onde você monta a cara da sua loja.</p>
+      <a class="wa" href="https://wa.me/${WA_SUPORTE}?text=${encodeURIComponent('Olá! Acabei de concluir a Fase 1 (Reconhecimento) do Acelerador. Quero falar com um especialista.')}" target="_blank" rel="noopener">💬 Falar com o suporte</a>
       <div class="ty-end">Vem que a meta é euro!</div>
     </div>`;
 }

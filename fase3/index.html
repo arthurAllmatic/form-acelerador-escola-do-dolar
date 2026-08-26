@@ -79,6 +79,11 @@
     padding:18px 34px;border-radius:36px;cursor:pointer;transition:.18s;text-decoration:none;
     box-shadow:0 12px 28px -12px rgba(184,134,11,.75)}
   .resgatar:hover{filter:brightness(1.04)}
+  .wa{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;box-sizing:border-box;
+    background:#25D366;color:#fff;border:none;font:700 15px Inter;letter-spacing:.2px;
+    padding:15px 30px;border-radius:34px;cursor:pointer;text-decoration:none;transition:.18s;
+    box-shadow:0 10px 24px -12px rgba(37,211,102,.7);margin-top:12px}
+  .wa:hover{filter:brightness(1.04)}
   .okpill{display:inline-flex;align-items:center;gap:8px;font:600 13px Inter;color:var(--green);
     background:var(--green-soft);border-radius:20px;padding:8px 14px;margin-bottom:14px}
   .infobar{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:14px;
@@ -95,6 +100,8 @@
 <script>
 const FASE="fase3", FORMULARIO="entrega_logo";
 const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+/* WhatsApp do suporte (só dígitos, com DDI). Se for celular, pode precisar do 9: 5551981708128 */
+const WA_SUPORTE="555181708128";
 
 /* ===== SUPABASE ===== */
 const SUPABASE_URL="https://wiktreeseddzzhbsbwkz.supabase.co";
@@ -358,6 +365,7 @@ function renderEntrega(){
             <li><span class="n">2</span><span>Resgate a sua loja e siga o passo a passo pra deixar tudo no ar.</span></li>
           </ul>
           ${resgatarBtn}
+          <a class="wa" href="https://wa.me/${WA_SUPORTE}?text=${encodeURIComponent('Olá! Concluí a Fase 3 do Acelerador. Agora só falta instalar o tema da minha loja — podem me ajudar?')}" target="_blank" rel="noopener">💬 Falar com o suporte</a>
         </div>
       </div>
     </div>`;

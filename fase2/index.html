@@ -134,6 +134,10 @@
   .thanks h1{font:400 clamp(38px,7.5vw,60px)/1.06 var(--serif);letter-spacing:0;margin:0 0 24px;max-width:680px}
   .thanks p{font:400 clamp(16px,2.4vw,17px)/1.7 Inter;color:#4a4651;max-width:540px;margin:0 auto 32px}
   .thanks .ty-end{font:400 clamp(30px,5.5vw,38px) var(--serif);font-style:italic;display:inline-block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wa{display:inline-flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;
+    font:700 15px Inter;letter-spacing:.2px;padding:15px 30px;border-radius:34px;cursor:pointer;
+    text-decoration:none;box-shadow:0 10px 24px -12px rgba(37,211,102,.7);transition:.18s;margin:4px auto 22px}
+  .wa:hover{filter:brightness(1.04)}
 </style>
 </head>
 <body>
@@ -146,6 +150,8 @@
 <script>
 const FASE="fase2", FORMULARIO="briefing_logo";
 const WEBHOOK="https://webhook.allmaticbrasil.com/webhook/lojaexclusiva";
+/* WhatsApp do suporte (só dígitos, com DDI). Se for celular, pode precisar do 9: 5551981708128 */
+const WA_SUPORTE="555181708128";
 
 /* ===== SUPABASE (config única — preencher com as credenciais do projeto) ===== */
 const SUPABASE_URL="https://wiktreeseddzzhbsbwkz.supabase.co";
@@ -496,6 +502,7 @@ function renderFinal(){
         <div class="planc"><h4>Nossa equipe (ao mesmo tempo)</h4><ul><li>Cria a sua logo no seu jeito (com direito a 2 alterações)</li><li>Escreve a descrição da sua loja</li><li>Escolhe os fornecedores e produtos da sua loja</li></ul></div>
       </div>
       <div class="notebar">💬 A gente te avisa pelo WhatsApp em até 24 horas.</div>
+      <a class="wa" href="https://wa.me/${WA_SUPORTE}?text=${encodeURIComponent('Olá! Acabei de concluir a Fase 2 (Minha Logo) do Acelerador. Quero falar com um especialista.')}" target="_blank" rel="noopener">💬 Falar com o suporte</a>
       <div class="ty-end">Vem que a meta é euro!</div>
     </div>`;
 }
