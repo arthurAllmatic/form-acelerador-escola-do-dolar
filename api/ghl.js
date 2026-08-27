@@ -29,8 +29,13 @@ const ACTIONS = {
   "fase4|concluido":  { stage: "Domínio Acompanhado", task: { title: "Vender Hostgator pro lead", dueInDays: 1 } }
 };
 
+// A oportunidade só fica "won" (ganho) na etapa final; qualquer outra etapa = "open".
+// Assim toda movimentação TIRA o ganho se o card estiver marcado por engano.
+const WON_STAGE = "Onboarding Concluído";
+
 const norm = s => (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 const digits = s => (s || "").replace(/\D/g, "");
+const statusForStage = stage => norm(stage) === norm(WON_STAGE) ? "won" : "open";
 
 // Lista de workspaces GHL ativos (só entra quem tiver token+location nas env vars)
 function targets(){
@@ -165,7 +170,7 @@ async function processTarget(t, body, action, status){
   if (!sid){
     result.moveErr = `etapa "${action.stage}" não encontrada`;
   } else if (opp){
-    const oppBody = { pipelineId: cfg.pipeline.id, pipelineStageId: sid };
+    const oppBody = { pipelineId: cfg.pipeline.id, pipelineStageId: sid, status: statusForStage(action.stage) };
     if (cfg.assignee) oppBody.assignedTo = cfg.assignee.id;
     const up = await api(t, `/opportunities/${opp.id}`, { method:"PUT", body: JSON.stringify(oppBody) });
     result.moved = up.ok; result.oppId = opp.id;
@@ -177,7 +182,7 @@ async function processTarget(t, body, action, status){
       pipelineStageId: sid,
       contactId: contact.id,
       name: (body.nome || body.email || "Lead").trim(),
-      status: "open"
+      status: statusForStage(action.stage)
     };
     if (cfg.assignee) create.assignedTo = cfg.assignee.id;
     const cr = await api(t, `/opportunities/`, { method:"POST", body: JSON.stringify(create) });
