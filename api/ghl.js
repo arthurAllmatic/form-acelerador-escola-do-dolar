@@ -5,6 +5,12 @@
 //  - move a etapa (ou CRIA o card, no workspace que permite)
 //  - cria tarefa pra atendente (quando previsto) + nota da fase
 //
+// ⚠️ REGRA DE ESCOPO (inegociável): este código SÓ cria/edita oportunidades no
+// pipeline "Onboarding Acelerador". NUNCA toca em cards de outras pipelines do
+// workspace (Suporte Geral/Loja/Premium, Helena AI, Reclame Aqui, Reembolso, etc.).
+// Garantido em 2 pontos: findOpportunity() só retorna card do pipeline alvo, e há
+// uma trava extra antes do PUT que ignora card de pipelineId diferente.
+//
 // Config por variáveis de ambiente no Vercel (NUNCA no código):
 //   Workspace COMERCIAL (original):
 //     GHL_TOKEN                 -> Private Integration token  [SECRETO]
@@ -141,10 +147,13 @@ async function findOrCreateContact(t, body){
   return { contact: c, created: !!c, upsertErr: c ? null : r.json };
 }
 
+// SÓ retorna oportunidade DESTE pipeline (Onboarding Acelerador). NUNCA cai em opps[0]:
+// o contato pode ter cards em outras pipes (Suporte Loja, Reclame Aqui, etc.) e este
+// código não pode tocar nelas — se não achar no pipeline alvo, retorna null (cria um novo).
 async function findOpportunity(t, contactId, pipelineId){
   const r = await api(t, `/opportunities/search?location_id=${t.loc}&contact_id=${contactId}&limit=50`);
   const opps = (r.json && r.json.opportunities) || [];
-  return opps.find(o => o.pipelineId === pipelineId) || opps[0] || null;
+  return opps.find(o => o.pipelineId === pipelineId) || null;
 }
 
 // roda a regra (mover/criar card + tarefa + nota) em UM workspace
@@ -169,6 +178,9 @@ async function processTarget(t, body, action, status){
   const opp = await findOpportunity(t, contact.id, cfg.pipeline.id);
   if (!sid){
     result.moveErr = `etapa "${action.stage}" não encontrada`;
+  } else if (opp && opp.pipelineId !== cfg.pipeline.id){
+    // trava de segurança: NUNCA mexer num card que não seja do pipeline Onboarding Acelerador
+    result.moveErr = "oportunidade encontrada é de outra pipeline — ignorada (só mexo no Onboarding Acelerador)";
   } else if (opp){
     const oppBody = { pipelineId: cfg.pipeline.id, pipelineStageId: sid, status: statusForStage(action.stage) };
     if (cfg.assignee) oppBody.assignedTo = cfg.assignee.id;
