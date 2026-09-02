@@ -139,10 +139,10 @@
   .rit.alertaerr b{color:#b3261e}
   .rit.alertaerr span{color:#7a2018;font:500 13.5px/1.5 Inter}
   .errdata{display:block;margin-top:6px;font:500 11.5px Inter;color:#b08681}
-  .regen{margin-top:4px;font:700 13px Inter;color:var(--gold-deep);border:1.5px solid var(--gold-line);
+  .regen,.uplogo{margin-top:4px;font:700 13px Inter;color:var(--gold-deep);border:1.5px solid var(--gold-line);
     background:var(--gold-soft);border-radius:20px;padding:9px 16px;cursor:pointer;transition:.16s}
-  .regen:hover{border-color:var(--gold)}
-  .regen:disabled{opacity:.6;cursor:default}
+  .regen:hover,.uplogo:hover{border-color:var(--gold)}
+  .regen:disabled,.uplogo:disabled{opacity:.6;cursor:default}
   .regenmsg{display:block;margin-top:8px;font:500 12.5px Inter;color:var(--muted)}
   .regenmsg.ok{color:var(--green)} .regenmsg.err{color:#b3261e}
 
@@ -462,7 +462,7 @@ function respHTML(l){
       <div class="campos">${campo("nome_loja","Nome da loja")}${campo("estilo","Estilo")}${campo("cor_logo","Cor da logo")}${campo("cor_loja","Cores da loja")}${campo("sensacao","Sensação")}${campo("conta_mais","Conta mais","area")}</div>
       <div class="estudioacoes">
         <button class="regen" data-lead="${esc(l.id)}">${r.logo_gerada_url?"↻ Gerar logo de novo":"✨ Gerar logo agora"}</button>
-        <button class="regen uplogo" data-lead="${esc(l.id)}" title="Troca a logo gerada por um arquivo seu (PNG/JPG/SVG). Vale pra Fase 3 e pro instalador.">📎 Subir logo no lugar</button>
+        <button class="uplogo" data-lead="${esc(l.id)}" title="Troca a logo gerada por um arquivo seu (PNG/JPG/SVG). Vale pra Fase 3 e pro instalador.">📎 Subir logo no lugar</button>
         <input type="file" class="uplogofile" id="uf-${esc(l.id)}" data-lead="${esc(l.id)}" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
         <span class="regenmsg" id="rg-${esc(l.id)}"></span>
       </div>
