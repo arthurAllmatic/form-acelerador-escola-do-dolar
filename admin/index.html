@@ -462,6 +462,8 @@ function respHTML(l){
       <div class="campos">${campo("nome_loja","Nome da loja")}${campo("estilo","Estilo")}${campo("cor_logo","Cor da logo")}${campo("cor_loja","Cores da loja")}${campo("sensacao","Sensação")}${campo("conta_mais","Conta mais","area")}</div>
       <div class="estudioacoes">
         <button class="regen" data-lead="${esc(l.id)}">${r.logo_gerada_url?"↻ Gerar logo de novo":"✨ Gerar logo agora"}</button>
+        <button class="regen uplogo" data-lead="${esc(l.id)}" title="Troca a logo gerada por um arquivo seu (PNG/JPG/SVG). Vale pra Fase 3 e pro instalador.">📎 Subir logo no lugar</button>
+        <input type="file" class="uplogofile" id="uf-${esc(l.id)}" data-lead="${esc(l.id)}" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
         <span class="regenmsg" id="rg-${esc(l.id)}"></span>
       </div>
       ${histHtml}</div>`;
@@ -475,7 +477,7 @@ function respHTML(l){
     const buster=r.logo_gerada_em?"?v="+encodeURIComponent(r.logo_gerada_em):"";
     const src=(r.logo_gerada_url?r.logo_gerada_url+buster:(String(r.logo_gerada_base64).startsWith("data:")?r.logo_gerada_base64:
       "data:image/png;base64,"+r.logo_gerada_base64));
-    gerada=`<div class="rit" style="grid-column:1/-1"><b>Logo gerada (IA)</b>
+    gerada=`<div class="rit" style="grid-column:1/-1"><b>${r.logo_origem==="upload_manual"?"Logo (enviada pelo painel)":"Logo gerada (IA)"}</b>
       <img class="logoprev" src="${String(src).replace(/"/g,'&quot;')}" alt="logo gerada">
       ${r.logo_gerada_url?`<a class="verlogo" href="${esc(r.logo_gerada_url+buster)}" target="_blank" rel="noopener">Ver logo do cliente ↗</a>`:""}</div>`;
   }
@@ -694,6 +696,46 @@ async function gerarLogo(leadId, btn){
     btn.disabled=false; btn.textContent=antes;
   }
 }
+
+/* Sobe uma logo escolhida pela equipe NO LUGAR da gerada: vai pro mesmo bucket "logos"
+   e pro mesmo campo (logo_gerada_url) que a Fase 3 e o instalador usam. A versão
+   anterior fica no histórico. */
+async function subirLogo(leadId, file, msgEl){
+  const lead=leads.find(x=>x.id===leadId);
+  if(!lead||!file) return;
+  const r=lead.respostas||{};
+  const setMsg=(cls,t)=>{ if(msgEl){ msgEl.className="regenmsg"+(cls?" "+cls:""); msgEl.textContent=t; } };
+  if(file.size>5*1024*1024) return setMsg("err","Arquivo muito grande (máx. 5 MB).");
+  setMsg("","Subindo a logo…");
+  try{
+    const ext=(file.type==="image/svg+xml"?"svg":file.type==="image/jpeg"?"jpg":file.type==="image/webp"?"webp":"png");
+    const path=`${encodeURIComponent(leadId)}-manual-${Date.now()}.${ext}`;
+    const up=await fetch(`${SUPABASE_URL}/storage/v1/object/logos/${path}`,{method:"POST",
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":file.type||"image/png","x-upsert":"true"},
+      body:file});
+    if(!up.ok) throw new Error("upload: "+(await up.text()).slice(0,200));
+    const url=`${SUPABASE_URL}/storage/v1/object/public/logos/${path}`;
+    const agora=new Date().toISOString();
+    const hist=(Array.isArray(r.logo_historico)?r.logo_historico:[]).slice(-9);
+    hist.push({url,prompt:"(upload manual pelo painel)",em:agora,ajustes:["upload manual: "+file.name]});
+    const novas={...r,logo_gerada_url:url,logo_gerada_em:agora,logo_origem:"upload_manual",logo_historico:hist};
+    delete novas.logo_erro; delete novas.logo_erro_em;
+    const patch=await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${encodeURIComponent(leadId)}`,{method:"PATCH",
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},
+      body:JSON.stringify({respostas:novas,atualizado_em:agora})});
+    if(!patch.ok) throw new Error("gravar no lead: "+(await patch.text()).slice(0,200));
+    setMsg("ok","✓ Logo trocada! Atualizando…");
+    await load(true);
+  }catch(e){ setMsg("err","Falhou: "+e.message); }
+}
+$("list").addEventListener("click",e=>{
+  const b=e.target.closest(".uplogo"); if(!b) return;
+  const inp=document.getElementById("uf-"+b.dataset.lead); if(inp){ inp.value=""; inp.click(); }
+});
+$("list").addEventListener("change",e=>{
+  const inp=e.target.closest(".uplogofile"); if(!inp||!inp.files||!inp.files[0]) return;
+  subirLogo(inp.dataset.lead, inp.files[0], document.getElementById("rg-"+inp.dataset.lead));
+});
 
 function draw(){drawCards();drawList();}
 
