@@ -260,7 +260,7 @@ const RESP_LABELS={
   estilo:"Estilo",cor:"Cor principal",cor_loja:"Cores da loja",cor_logo:"Cor da logo",
   conta_mais:"Conta mais",sensacao:"Sensação",lead_id_origem:"Lead de origem",
   logo_prompt:"Prompt da logo (IA)",
-  loja_shopify:"Loja Shopify",tema_instalado:"Tema instalado",ultimo_erro:"Último erro",erro_detalhe:"Erro (técnico)",
+  loja_shopify:"Loja Shopify",tema_instalado:"Tema instalado",push_com_erros:"Push rejeitou (arquivos)",push_reforco_ok:"Reforço do push ok",ultimo_erro:"Último erro",erro_detalhe:"Erro (técnico)",
   pais:"País",produto:"Produto",idioma:"Idioma",cor:"Cor aplicada",
   banner:"Banner aplicado",banner_fallback:"Banner (fallback)",logo:"Logo aplicada",cores:"Cores aplicadas",
   builder_link:"Link do builder",logo_baixada:"Baixou a logo",resgatou:"Resgatou a loja",
@@ -410,8 +410,11 @@ function respHTML(l){
       const st=ST[t.status]||{label:t.status||"—",cls:"novo"};
       const quando=t.atualizado_em?new Date(t.atualizado_em).toLocaleString("pt-BR"):"—";
       const erro=tr.ultimo_erro?`<span class="logerr">⚠ ${esc(tr.ultimo_erro)}</span>`:"";
+      // arquivos que a Shopify rejeitou no push (o instalador tenta de novo e marca se corrigiu)
+      const rej=Array.isArray(tr.push_com_erros)&&tr.push_com_erros.length
+        ?`<span class="logerr" title="Arquivos rejeitados pela Shopify no upload">⚠ Push rejeitou: ${esc(tr.push_com_erros.join(", "))}${tr.push_reforco_ok?" ✓ corrigido":""}</span>`:"";
       const loja=tr.loja_shopify?`<span class="logloja">${esc(tr.loja_shopify)}</span>`:`<span class="logloja" style="color:#b3b0ba">(sem loja)</span>`;
-      return `<div class="logrow"><span class="logwhen">${esc(quando)}</span>${loja}<span class="st st-${st.cls}">${esc(st.label)}</span>${erro}</div>`;
+      return `<div class="logrow"><span class="logwhen">${esc(quando)}</span>${loja}<span class="st st-${st.cls}">${esc(st.label)}</span>${erro}${rej}</div>`;
     }).join("");
     logInstala=`<div class="rit loginstala" style="grid-column:1/-1">
       <b>📋 Log de instalações — ${tentativas.length} tentativa${tentativas.length===1?"":"s"}, ${okN} com sucesso</b>
