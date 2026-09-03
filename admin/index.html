@@ -573,6 +573,13 @@ function drawList(){
   $("list").querySelectorAll(".regen").forEach(b=>{
     b.onclick=e=>{ e.stopPropagation(); gerarLogo(b.dataset.lead, b); };
   });
+  $("list").querySelectorAll(".uplogo").forEach(b=>{
+    b.onclick=e=>{ e.stopPropagation(); const inp=document.getElementById("uf-"+b.dataset.lead); if(inp){ inp.value=""; inp.click(); } };
+  });
+  $("list").querySelectorAll(".uplogofile").forEach(inp=>{
+    inp.onclick=e=>e.stopPropagation();
+    inp.onchange=()=>{ if(inp.files&&inp.files[0]) subirLogo(inp.dataset.lead, inp.files[0], document.getElementById("rg-"+inp.dataset.lead)); };
+  });
   // Estúdio: adicionar ajuste, remover ajuste, salvar campo editado
   $("list").querySelectorAll(".chatadd").forEach(b=>{
     b.onclick=e=>{ e.stopPropagation(); addAjuste(b.dataset.lead, b); };
@@ -728,14 +735,6 @@ async function subirLogo(leadId, file, msgEl){
     await load(true);
   }catch(e){ setMsg("err","Falhou: "+e.message); }
 }
-$("list").addEventListener("click",e=>{
-  const b=e.target.closest(".uplogo"); if(!b) return;
-  const inp=document.getElementById("uf-"+b.dataset.lead); if(inp){ inp.value=""; inp.click(); }
-});
-$("list").addEventListener("change",e=>{
-  const inp=e.target.closest(".uplogofile"); if(!inp||!inp.files||!inp.files[0]) return;
-  subirLogo(inp.dataset.lead, inp.files[0], document.getElementById("rg-"+inp.dataset.lead));
-});
 
 function draw(){drawCards();drawList();}
 
