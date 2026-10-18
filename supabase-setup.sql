@@ -36,3 +36,20 @@ create policy "anon pode atualizar" on public.leads
 drop policy if exists "anon pode ler" on public.leads;
 create policy "anon pode ler" on public.leads
   for select to anon using (true);
+
+-- =====================================================================
+-- Painel /admin (18/10/2026): lista sem as logos em base64.
+-- O painel relia a tabela inteira a cada 15 s com as logos (~19 MB de 20 MB por
+-- leitura) e estourou a cota de tráfego da Supabase. A visão entrega o mesmo
+-- registro sem logo_base64/logo_gerada_base64 (e diz se tem); o painel busca a
+-- imagem só ao abrir o lead. Respeita o RLS da tabela (security_invoker).
+-- =====================================================================
+create or replace view public.leads_admin with (security_invoker = true) as
+select id, fase, formulario, status, step, nome, email, whatsapp,
+       (coalesce(respostas, '{}'::jsonb) - 'logo_base64' - 'logo_gerada_base64') as respostas,
+       coalesce(respostas ? 'logo_base64', false)        as tem_logo_propria,
+       coalesce(respostas ? 'logo_gerada_base64', false) as tem_logo_gerada_base64,
+       criado_em, atualizado_em
+from public.leads;
+
+grant select on public.leads_admin to anon;

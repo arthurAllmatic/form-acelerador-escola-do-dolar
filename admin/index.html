@@ -236,7 +236,14 @@
 const SUPABASE_URL="https://wiktreeseddzzhbsbwkz.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpa3RyZWVzZWRkenpoYnNid2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDkwMDgsImV4cCI6MjA3NzUyNTAwOH0.U-X9n-SK0zLC7ZU_RBXYvXjRpLTnOAqTWJxMOmY5JFk";
 
-const REFRESH_MS=15000;
+// 18/10/2026: a cada 15 s o painel baixava a tabela inteira com as logos em base64 (~20 MB por vez) e
+// estourou a cota de tráfego da Supabase. Agora: lista pela visão leads_admin (sem as logos), em páginas
+// (passa de 1000 leads), atualizando só o que mudou a cada 60 s e recarregando tudo a cada 10 min.
+// A logo em base64 só é buscada quando a pessoa abre o lead. Sem a visão, cai na tabela como antes.
+const REFRESH_MS=60000;
+const RECARGA_CHEIA_MS=10*60*1000;
+let fonte="leads_admin", ultimaAtualizacao=null, cheioEm=0;
+const H_SB={apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY};
 
 const FORMS={
   reconhecimento:{label:"Reconhecimento",fase:"Fase 1"},
@@ -302,6 +309,22 @@ function rel(iso){
   return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
 }
 
+async function buscarPaginas(query){
+  const out=[];
+  for(let de=0;de<20000;de+=1000){
+    const r=await fetch(SUPABASE_URL+"/rest/v1/"+fonte+"?"+query,{headers:{...H_SB,Range:de+"-"+(de+999),"Range-Unit":"items"}});
+    if(!r.ok){
+      // a visão ainda não existe nesse projeto: lê da tabela (com as logos), como antes
+      if(fonte==="leads_admin"&&(r.status===404||r.status===400)){ fonte="leads"; return buscarPaginas(query); }
+      throw new Error("HTTP "+r.status);
+    }
+    const lote=await r.json();
+    out.push(...lote);
+    if(lote.length<1000) break;
+  }
+  return out;
+}
+
 async function load(manual){
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
     $("cfgwarn").style.display="block";
@@ -310,10 +333,34 @@ async function load(manual){
   }
   try{
     if(manual) $("synctxt").textContent="atualizando…";
-    const r=await fetch(SUPABASE_URL+"/rest/v1/leads?select=*&order=atualizado_em.desc",{
-      headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY}});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    leads=(await r.json()).filter(l=>!FORMS_IGNORAR.has(l.formulario));
+    const cheio=manual||!ultimaAtualizacao||Date.now()-cheioEm>RECARGA_CHEIA_MS;
+    if(cheio){
+      const todos=await buscarPaginas("select=*&order=atualizado_em.desc,id.desc");
+      // mantém a logo que já foi carregada pra quem está aberto
+      const antes=new Map(leads.map(l=>[l.id,l]));
+      leads=todos.filter(l=>!FORMS_IGNORAR.has(l.formulario)).map(l=>{
+        const a=antes.get(l.id); if(!a) return l;
+        const r={...(l.respostas||{})};
+        if(a.respostas&&a.respostas.logo_base64&&!r.logo_base64) r.logo_base64=a.respostas.logo_base64;
+        if(a.respostas&&a.respostas.logo_gerada_base64&&!r.logo_gerada_base64) r.logo_gerada_base64=a.respostas.logo_gerada_base64;
+        return {...l,respostas:r};
+      });
+      cheioEm=Date.now();
+    }else{
+      // só o que mudou desde a última leitura (1 min de folga pro relógio de quem gravou)
+      const desde=new Date(new Date(ultimaAtualizacao).getTime()-60000).toISOString();
+      const novos=await buscarPaginas("select=*&atualizado_em=gt."+encodeURIComponent(desde)+"&order=atualizado_em.desc,id.desc");
+      const porId=new Map(leads.map(l=>[l.id,l]));
+      for(const l of novos){
+        if(FORMS_IGNORAR.has(l.formulario)) continue;
+        const a=porId.get(l.id);
+        const r={...(l.respostas||{})};
+        if(a&&a.respostas&&a.respostas.logo_base64&&!r.logo_base64&&l.tem_logo_propria) r.logo_base64=a.respostas.logo_base64;
+        porId.set(l.id,{...l,respostas:r});
+      }
+      leads=[...porId.values()];
+    }
+    for(const l of leads) if(l.atualizado_em&&(!ultimaAtualizacao||l.atualizado_em>ultimaAtualizacao)) ultimaAtualizacao=l.atualizado_em;
     $("sync").classList.remove("err");
     $("synctxt").textContent="atualizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
   }catch(e){
@@ -321,6 +368,37 @@ async function load(manual){
     $("synctxt").textContent="erro ao carregar ("+e.message+")";
   }
   draw();
+}
+
+/* Respostas COMPLETAS de um lead, direto da tabela (com as logos). Toda gravação parte daqui: a lista vem
+   sem as logos e regravar a partir dela apagaria a logo que o aluno subiu. */
+async function respostasCompletas(leadId){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/leads?id=eq."+encodeURIComponent(leadId)+"&select=respostas",{headers:H_SB});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const d=await r.json();
+  if(!d.length) throw new Error("lead não encontrado");
+  return d[0].respostas||{};
+}
+
+/* Ao abrir uma pessoa: busca as logos em base64 dos leads dela que têm (só a imagem, sob demanda). */
+async function carregarLogos(grupoKey){
+  const g=agrupar(leads).find(x=>x.key===grupoKey);
+  if(!g) return;
+  const faltam=Object.values(g.porForm).filter(l=>(l.tem_logo_propria&&!(l.respostas||{}).logo_base64)||(l.tem_logo_gerada_base64&&!(l.respostas||{}).logo_gerada_base64));
+  if(!faltam.length) return;
+  try{
+    const ids=faltam.map(l=>encodeURIComponent(l.id)).join(",");
+    const r=await fetch(SUPABASE_URL+"/rest/v1/leads?id=in.("+ids+")&select=id,logo_base64:respostas->>logo_base64,logo_mime:respostas->>logo_mime,logo_gerada_base64:respostas->>logo_gerada_base64",{headers:H_SB});
+    if(!r.ok) return;
+    for(const x of await r.json()){
+      const l=leads.find(y=>y.id===x.id); if(!l) continue;
+      l.respostas={...(l.respostas||{})};
+      if(x.logo_base64) l.respostas.logo_base64=x.logo_base64;
+      if(x.logo_mime&&!l.respostas.logo_mime) l.respostas.logo_mime=x.logo_mime;
+      if(x.logo_gerada_base64) l.respostas.logo_gerada_base64=x.logo_gerada_base64;
+    }
+    drawList();
+  }catch(e){}
 }
 
 function grupos(){
@@ -471,6 +549,9 @@ function respHTML(l){
       </div>
       ${histHtml}</div>`;
   }
+  if(!r.logo_base64&&l.tem_logo_propria){
+    logo=`<div class="rit" style="grid-column:1/-1"><b>Logo enviada</b><span class="anon">carregando a logo</span></div>`;
+  }
   if(r.logo_base64){
     const src=String(r.logo_base64).startsWith("data:")?r.logo_base64:
       "data:"+(r.logo_mime||"image/png")+";base64,"+r.logo_base64;
@@ -571,6 +652,7 @@ function drawList(){
       const id=m.parentElement.dataset.id;
       aberto.has(id)?aberto.delete(id):aberto.add(id);
       m.parentElement.classList.toggle("open");
+      if(aberto.has(id)) carregarLogos(id);
     };
   });
   $("list").querySelectorAll(".regen").forEach(b=>{
@@ -626,12 +708,14 @@ function drawList(){
 async function patchRespostas(leadId, mut){
   const lead=leads.find(x=>x.id===leadId);
   if(!lead) return false;
-  const novas=mut({...(lead.respostas||{})});
+  let base;
+  try{ base=await respostasCompletas(leadId); }catch(e){ return false; }
+  const novas=mut({...base});
   const r=await fetch(SUPABASE_URL+"/rest/v1/leads?id=eq."+encodeURIComponent(leadId),{
     method:"PATCH",
     headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,
       "Content-Type":"application/json",Prefer:"return=minimal"},
-    body:JSON.stringify({respostas:novas})});
+    body:JSON.stringify({respostas:novas,atualizado_em:new Date().toISOString()})});
   if(r.ok) lead.respostas=novas;
   return r.ok;
 }
@@ -726,9 +810,10 @@ async function subirLogo(leadId, file, msgEl){
     if(!up.ok) throw new Error("upload: "+(await up.text()).slice(0,200));
     const url=`${SUPABASE_URL}/storage/v1/object/public/logos/${path}`;
     const agora=new Date().toISOString();
-    const hist=(Array.isArray(r.logo_historico)?r.logo_historico:[]).slice(-9);
+    const completas=await respostasCompletas(leadId); // nunca regravar a partir da lista (vem sem as logos)
+    const hist=(Array.isArray(completas.logo_historico)?completas.logo_historico:[]).slice(-9);
     hist.push({url,prompt:"(upload manual pelo painel)",em:agora,ajustes:["upload manual: "+file.name]});
-    const novas={...r,logo_gerada_url:url,logo_gerada_em:agora,logo_origem:"upload_manual",logo_historico:hist};
+    const novas={...completas,logo_gerada_url:url,logo_gerada_em:agora,logo_origem:"upload_manual",logo_historico:hist};
     delete novas.logo_erro; delete novas.logo_erro_em;
     const patch=await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${encodeURIComponent(leadId)}`,{method:"PATCH",
       headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},
