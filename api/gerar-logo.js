@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
     const nicho = await buscarNicho(lead_id_origem || base.lead_id_origem, email);
 
     const prompt = montarPrompt(dados, nicho, ajustes);
-    const pngBase64 = await gerarImagem(prompt, "gpt-image-1");
+    const pngBase64 = await gerarImagem(prompt);
 
     // Sobe no bucket público "logos" — nome versionado pra preservar o histórico
     const path = `${encodeURIComponent(lead_id)}-${Date.now()}.png`;
@@ -126,11 +126,12 @@ function montarPrompt(r, nicho, ajustes) {
   return p.join(" ");
 }
 
-async function gerarImagem(prompt, model, erroAnterior) {
-  // Sem response_format: gpt-image-1 já devolve b64_json e o dall-e-3 devolve url
-  // (tratada logo abaixo). Passar response_format faz a API rejeitar a chamada.
-  const body = { model, prompt, n: 1, size: "1024x1024" };
-  if (model === "gpt-image-1") { body.background = "transparent"; body.quality = "high"; }
+// 29/10/2026: a OpenAI tirou do ar o gpt-image-1 e o dall-e-3 ("The model ... does not exist").
+// Agora: gpt-image-1.5 com fundo transparente (testado); se falhar, gpt-image-2, que não aceita
+// transparente e sai com fundo normal. Os dois devolvem b64_json.
+async function gerarImagem(prompt, model = "gpt-image-1.5", erroAnterior) {
+  const body = { model, prompt, n: 1, size: "1024x1024", output_format: "png", quality: "high" };
+  if (model === "gpt-image-1.5") body.background = "transparent";
   const r = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
@@ -139,9 +140,8 @@ async function gerarImagem(prompt, model, erroAnterior) {
   const j = await r.json();
   if (!r.ok) {
     const msg = (j.error && j.error.message) || ("OpenAI HTTP " + r.status);
-    // gpt-image-1 pode exigir verificação da org — cai pro dall-e-3
-    if (model === "gpt-image-1") return gerarImagem(prompt, "dall-e-3", msg);
-    throw new Error(`dall-e-3: ${msg}` + (erroAnterior ? ` | gpt-image-1: ${erroAnterior}` : ""));
+    if (model === "gpt-image-1.5") return gerarImagem(prompt, "gpt-image-2", msg);
+    throw new Error(`gpt-image-2: ${msg}` + (erroAnterior ? ` | gpt-image-1.5: ${erroAnterior}` : ""));
   }
   const d = j.data && j.data[0];
   if (d && d.b64_json) return d.b64_json;
