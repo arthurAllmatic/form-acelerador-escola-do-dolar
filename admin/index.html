@@ -829,7 +829,19 @@ function draw(){drawCards();drawList();}
 $("q").oninput=e=>{busca=e.target.value;drawList();};
 $("refresh").onclick=()=>load(true);
 
-load();
+/* Link direto do dash (17/11/2026): ?q=<email> já filtra a pessoa e, se sobrar uma só, abre as respostas dela.
+   O botão "ver respostas" do Atendimento (setor Loja) abre o painel assim, em outra aba. */
+const qUrl=(new URLSearchParams(location.search).get("q")||"").trim();
+if(qUrl){ busca=qUrl; $("q").value=qUrl; }
+function abrirDaUrl(){
+  if(!qUrl) return;
+  const lista=filtrados();
+  if(lista.length===1&&!aberto.has(lista[0].key)){
+    aberto.add(lista[0].key); drawList(); carregarLogos(lista[0].key);
+  }
+}
+
+load().then(abrirDaUrl);
 timer=setInterval(load,REFRESH_MS);
 </script>
 </body>
